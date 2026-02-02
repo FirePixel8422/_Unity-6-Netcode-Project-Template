@@ -399,7 +399,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.81413317, g: 0.8250596, b: 0.87169814, a: 1}
+  m_Color: {r: 0.9169811, g: 0.44810963, b: 0.44810963, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3296,7 +3296,7 @@ MonoBehaviour:
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6939196230315922887}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: FirePixel.Networking.PlayerNameHandler, Assembly-CSharp
         m_MethodName: OnInputFieldChanged
         m_Mode: 0
@@ -3395,7 +3395,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.81413317, g: 0.8250596, b: 0.87169814, a: 1}
+  m_Color: {r: 0.9169811, g: 0.44810963, b: 0.44810963, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4218,7 +4218,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.81413317, g: 0.8250596, b: 0.87169814, a: 1}
+  m_Color: {r: 0.9169811, g: 0.44810963, b: 0.44810963, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4268,7 +4268,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.81413317, g: 0.8250596, b: 0.87169814, a: 1}
+  m_Color: {r: 0.9169811, g: 0.44810963, b: 0.44810963, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4643,7 +4643,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.97735846, g: 0.66202205, b: 0.66202205, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4842,24 +4842,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1304928096739069418}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 679d5c7b653d5974091c0ff05488505d, type: 3}
+  m_Script: {fileID: 11500000, guid: 137d62ac59c6d11488462dd4787eade9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   nameInputField: {fileID: 2667414720792394601}
   previewTextField: {fileID: 244088539743759644}
   nameChosen: 0
-  funnyNames:
-  - JohnDoe
-  - WillowWilson
-  - BijnaMichael
-  - Yi-Long-Ma
-  - Loading4Ever
-  - DickSniffer
-  - CraniumSnuiver
-  - Moe-Lester
-  - HonkiePlonkie
-  - WhyIsThisHere
-  - TheFrenchLikeBaguette
+  randomPlayerNames: {fileID: 11400000, guid: 5860e335346303f4198c877a3f240a2c, type: 2}
 --- !u!1 &6942660419197203838
 GameObject:
   m_ObjectHideFlags: 0
@@ -4918,7 +4907,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.81413317, g: 0.8250596, b: 0.87169814, a: 1}
+  m_Color: {r: 0.9169811, g: 0.44810963, b: 0.44810963, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4984,7 +4973,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.97735846, g: 0.66202205, b: 0.66202205, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -5233,7 +5222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.81413317, g: 0.8250596, b: 0.87169814, a: 1}
+  m_Color: {r: 0.9169811, g: 0.44810963, b: 0.44810963, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -5453,7 +5442,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.81413317, g: 0.8250596, b: 0.87169814, a: 1}
+  m_Color: {r: 0.9169811, g: 0.44810963, b: 0.44810963, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

@@ -1,6 +1,4 @@
 ﻿using Unity.Netcode;
-using UnityEngine;
-
 
 
 namespace FirePixel.Networking
@@ -10,7 +8,13 @@ namespace FirePixel.Networking
     /// </summary>
     public class SmartNetworkBehaviour : NetworkBehaviour
     {
-        public bool isNetworkSystemInitilized;
+        /// <summary>
+        /// True 
+        /// </summary>
+        public bool IsNetworkSystemInitilized;
+
+
+        #region Usefull quick acces to data
 
         /// <summary>
         /// Pointer to <see cref="NetworkManager.LocalClientId"/>
@@ -32,21 +36,34 @@ namespace FirePixel.Networking
         /// </summary>
         public static string LocalClientGUID => ClientManager.LocalPlayerGUID;
 
-
+        #endregion
 
 
         public override void OnNetworkSpawn()
         {
             ClientManager.GetOnInitializedCallback(() => 
             {
-                isNetworkSystemInitilized = true;
+                IsNetworkSystemInitilized = true;
                 OnNetworkSystemsSetup(); 
             });
+
+            NetworkManager.NetworkTickSystem.Tick += OnNetworkTick;
         }
 
         /// <summary>
         /// Called After all custom build NetworkSystems have been setup through <see cref="ClientManager.OnInitialized"/>
         /// </summary>
-        public virtual void OnNetworkSystemsSetup() { }
+        protected virtual void OnNetworkSystemsSetup() { }
+
+        /// <summary>
+        /// Called before every network tick (before all scheduled RPCs are executed)
+        /// </summary>
+        protected virtual void OnNetworkTick() { }
+
+
+        public override void OnDestroy()
+        {
+            NetworkManager.NetworkTickSystem.Tick -= OnNetworkTick;
+        }
     }
 }

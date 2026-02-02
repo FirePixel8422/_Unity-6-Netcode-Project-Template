@@ -1,13 +1,11 @@
 #if UNITY_EDITOR
-using FirePixel.Networking;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-public class DebugDataDisplay : MonoBehaviour
+public class DebugDataDisplay : UpdateMonoBehaviour
 {
     [SerializeField, Tooltip("Average over this many seconds")]
     private float avgTime = 1f;
@@ -35,8 +33,6 @@ public class DebugDataDisplay : MonoBehaviour
     [SerializeField] private int activeComponentCount;
     [SerializeField] private int activeAudioSources;
 
-    [SerializeField] private int networkObjectCount;
-
     private static readonly CultureInfo enCulture = new CultureInfo("en-US");
 
     private struct FrameData
@@ -47,18 +43,12 @@ public class DebugDataDisplay : MonoBehaviour
 
     private readonly Queue<FrameData> frameTimes = new Queue<FrameData>();
 
-    private void OnEnable()
-    {
-        UpdateScheduler.RegisterUpdate(OnUpdate);
-        ReloadExpensiveStats(); // Initial load of expensive stats
-    }
 
-    private void OnDisable()
+    private void Start()
     {
-        UpdateScheduler.UnRegisterUpdate(OnUpdate);
+        ReloadExpensiveStats();
     }
-
-    private void OnUpdate()
+    protected override void OnUpdate()
     {
         float currentTime = Time.time;
         float deltaTime = Time.deltaTime;
@@ -105,8 +95,6 @@ public class DebugDataDisplay : MonoBehaviour
 
         componentCount = this.FindObjectsOfType<Component>(true).Count(c => c is not Transform);
         activeComponentCount = this.FindObjectsOfType<Component>(true).Count(c => c is not Transform);
-
-        networkObjectCount = this.FindObjectsOfType<NetworkObject>(true).Length;
 
         activeAudioSources = 0;
         AudioSource[] sources = this.FindObjectsOfType<AudioSource>(true);

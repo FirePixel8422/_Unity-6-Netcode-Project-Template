@@ -20,10 +20,10 @@ namespace FirePixel.Networking
         [Header("Log Debug information")]
         [SerializeField] private bool logDebugInfo = true;
 
+        [SerializeField] private NetworkStruct<PlayerIdDataArray> playerIdDataArray = new NetworkStruct<PlayerIdDataArray>();
+
 
         #region PlayerIdDataArray var get, set and sync methods
-
-        [SerializeField] private NetworkStruct<PlayerIdDataArray> playerIdDataArray = new NetworkStruct<PlayerIdDataArray>();
 
         /// <summary>
         /// Get PlayerIdDataArray Copy (changes on copy wont sync back to clientManager and wont cause a networkSync unless sent back with  <see cref="SetPlayerIdDataArray_OnServer"/>")
@@ -39,10 +39,7 @@ namespace FirePixel.Networking
         public static void SetPlayerIdDataArray_OnServer(PlayerIdDataArray newValue)
         {
 #if UNITY_EDITOR
-            if (Instance.IsServer == false)
-            {
-                DebugLogger.LogError("UpdatePlayerIdDataArray_OnServer called on non server Client, this should only be called from the server!");
-            }
+            DebugLogger.LogError("SetPlayerIdDataArray_OnServer called on non server Client, this should only be called from the server!", Instance.IsServer == false);
 #endif
             Instance.playerIdDataArray.Value = newValue;
         }
@@ -118,7 +115,7 @@ namespace FirePixel.Networking
         public static Action<ulong, int, int> OnClientConnectedCallback;
 
         /// <summary>
-        /// Invoked after <see cref="NetworkManager.OnClientDisconnectCallback"/>, before updating <see cref="ClientManager"/> gameId logic.    returns: ulong clientId, int clientGamId, int clientInLobbyCount
+        /// Invoked after <see cref="NetworkManager.OnClientDisconnectCallback"/>, before updating <see cref="ClientManager"/> gameId logic. returns: ulong clientId, int clientGamId, int clientInLobbyCount
         /// </summary>
         public static Action<ulong, int, int> OnClientDisconnectedCallback;
 
@@ -138,8 +135,7 @@ namespace FirePixel.Networking
         /// </summary>
         public static int LocalClientGameId { get; private set; }
 
-
-        /// <summary>
+       /// <summary>
         /// Amount of Players in server that have been setup by ClientManager (game/team ID System)
         /// </summary>
         public static int PlayerCount => Instance.playerIdDataArray.Value.PlayerCount;

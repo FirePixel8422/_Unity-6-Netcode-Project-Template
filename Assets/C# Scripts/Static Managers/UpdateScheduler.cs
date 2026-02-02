@@ -1,192 +1,245 @@
 using System;
+using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
 
-/// <summary>
-/// Uitlity class to have an optimized easy acces to Updte Callbacks by using an Action based callback system
-/// </summary>
-public static class UpdateScheduler
+namespace Fire_Pixel.Utility
 {
-#pragma warning disable UDR000
-    private static Action OnUpdate;
-    private static Action OnLateUpdate;
-    private static Action OnFixedUpdate;
-
-    private static Action OnLateDestroy;
-    private static Action OnLateApplicationQuit;
-#pragma warning restore UDR0002
-
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Initialize()
-    {
-        UpdateCallbackManager gameManager = new GameObject("UpdateCallbackManager").AddComponent<UpdateCallbackManager>();
-        gameManager.gameObject.isStatic = true;
-
-        GameObject.DontDestroyOnLoad(gameManager.gameObject);
-    }
-
-
-    #region void Update
-
-    /// <summary>
-    /// Register a method to call every frame like Update()
-    /// </summary>
-    public static void RegisterUpdate(Action action)
-    {
+#pragma warning disable UDR0002
 #pragma warning disable UDR0004
-        OnUpdate += action;
-#pragma warning restore UDR0004
-    }
     /// <summary>
-    /// Unregister a registerd method for Update()
+    /// Uitlity class to have an optimized easy acces to Updte Callbacks by using an Action based callback system
     /// </summary>
-    public static void UnRegisterUpdate(Action action)
+    public static class UpdateScheduler
     {
-        OnUpdate -= action;
-    }
-    /// <summary>
-    /// Register or Unregister a method for Update() based on bool <paramref name="register"/>
-    /// </summary>
-    public static void ManageUpdate(Action action, bool register)
-    {
-        if (register)
+        private static Action OnUpdate;
+        private static Action OnLateUpdate;
+        private static Action OnFixedUpdate;
+
+        private static Action OnLateDestroy;
+        private static Action OnLateApplicationQuit;
+
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Initialize()
         {
-            RegisterUpdate(action);
+            UpdateCallbackManager gameManager = new GameObject("UpdateCallbackManager").AddComponent<UpdateCallbackManager>();
+            gameManager.Init();
+
+            GameObject.DontDestroyOnLoad(gameManager.gameObject);
         }
-        else
+
+
+        #region void Update
+
+        /// <summary>
+        /// Register a method to call every frame like Update()
+        /// </summary>
+        public static void RegisterUpdate(Action action)
         {
-            UnRegisterUpdate(action);
+            OnUpdate += action;
         }
-    }
-
-    #endregion
-
-
-    #region void LateUpdate
-
-    /// <summary>
-    /// Register a method to call every frame like Update()
-    /// </summary>
-    public static void RegisterLateUpdate(Action action)
-    {
-#pragma warning disable UDR0004
-        OnLateUpdate += action;
-#pragma warning restore UDR0004
-    }
-    /// <summary>
-    /// Unregister a registerd method for Update()
-    /// </summary>
-    public static void UnRegisterLateUpdate(Action action)
-    {
-        OnLateUpdate -= action;
-    }
-    /// <summary>
-    /// Register or Unregister a method for Update() based on bool <paramref name="register"/>
-    /// </summary>
-    public static void ManageLateUpdate(Action action, bool register)
-    {
-        if (register)
+        /// <summary>
+        /// Unregister a registerd method for Update()
+        /// </summary>
+        public static void UnRegisterUpdate(Action action)
         {
-            RegisterLateUpdate(action);
+            OnUpdate -= action;
         }
-        else
+        /// <summary>
+        /// Register or Unregister a method for Update() based on bool <paramref name="register"/>
+        /// </summary>
+        public static void ManageUpdate(Action action, bool register)
         {
-            UnRegisterLateUpdate(action);
-        }
-    }
-
-    #endregion
-
-
-    #region void FixedUpdate
-
-    /// <summary>
-    /// Register a method to call every frame like FixedUpdate()
-    /// </summary>
-    public static void RegisterFixedUpdate(Action action)
-    {
-#pragma warning disable UDR0004
-        OnFixedUpdate += action;
-#pragma warning restore UDR0004
-    }
-    /// <summary>
-    /// Unregister a registerd method for FixedUpdate()
-    /// </summary>
-    public static void UnRegisterFixedUpdate(Action action)
-    {
-        OnFixedUpdate -= action;
-    }
-    /// <summary>
-    /// Register or Unregister a method for FixedUpdate() based on bool <paramref name="register"/>
-    /// </summary>
-    public static void ManageFixedUpdate(Action action, bool register)
-    {
-        if (register)
-        {
-            RegisterFixedUpdate(action);
-        }
-        else
-        {
-            UnRegisterFixedUpdate(action);
-        }
-    }
-
-    #endregion
-
-
-    public static void CreateLateOnDestroyCallback(Action action)
-    {
-        OnLateDestroy += action;
-    }
-
-    public static void CreateLateOnApplicationQuitCallback(Action action)
-    {
-        OnLateApplicationQuit += action;
-    }
-
-
-    /// <summary>
-    /// Handle Update Callbacks and batch them for every script by an event based register system
-    /// </summary>
-    private class UpdateCallbackManager : MonoBehaviour
-    {
-        private void Update()
-        {
-            OnUpdate?.Invoke();
-        }
-        private void LateUpdate()
-        {
-            OnLateUpdate?.Invoke();
-
-            if (OnLateDestroy != null)
+            if (register)
             {
-                OnLateDestroy.Invoke();
-                OnLateDestroy = null;
+                RegisterUpdate(action);
+            }
+            else
+            {
+                UnRegisterUpdate(action);
             }
         }
 
-        private void FixedUpdate()
+        #endregion
+
+
+        #region void NetworkTick
+
+        /// <summary>
+        /// Register a method to call every frame like NetworkTick()
+        /// </summary>
+        public static void RegisterNetworkTick(Action action)
         {
-            OnFixedUpdate?.Invoke();
+            NetworkManager.Singleton.NetworkTickSystem.Tick += action;
+        }
+        /// <summary>
+        /// Unregister a registerd method for NetworkTick()
+        /// </summary>
+        public static void UnRegisterNetworkTick(Action action)
+        {
+            NetworkManager.Singleton.NetworkTickSystem.Tick -= action;
+        }
+        /// <summary>
+        /// Register or Unregister a method for NetworkTick() based on bool <paramref name="register"/>
+        /// </summary>
+        public static void ManageNetworkTick(Action action, bool register)
+        {
+            if (register)
+            {
+                RegisterNetworkTick(action);
+            }
+            else
+            {
+                UnRegisterNetworkTick(action);
+            }
         }
 
-        private void OnApplicationQuit()
+        #endregion
+
+
+        #region void LateUpdate
+
+        /// <summary>
+        /// Register a method to call after every frame like LateUpdate()
+        /// </summary>
+        public static void RegisterLateUpdate(Action action)
         {
-            OnLateUpdate += () =>
-            {
-                if (OnLateApplicationQuit != null)
-                {
-                    OnLateApplicationQuit.Invoke();
-                    OnLateApplicationQuit = null;
-                }
-            };
+            OnLateUpdate += action;
         }
-        private void OnDestroy()
+        /// <summary>
+        /// Unregister a registerd method for LateUpdate()
+        /// </summary>
+        public static void UnRegisterLateUpdate(Action action)
         {
-            OnUpdate = null;
-            OnLateUpdate = null;
-            OnFixedUpdate = null;
+            OnLateUpdate -= action;
+        }
+        /// <summary>
+        /// Register or Unregister a method for LateUpdate() based on bool <paramref name="register"/>
+        /// </summary>
+        public static void ManageLateUpdate(Action action, bool register)
+        {
+            if (register)
+            {
+                RegisterLateUpdate(action);
+            }
+            else
+            {
+                UnRegisterLateUpdate(action);
+            }
+        }
+
+        #endregion
+
+
+        #region void FixedUpdate
+
+        /// <summary>
+        /// Register a method to call every fixed frame like FixedUpdate()
+        /// </summary>
+        public static void RegisterFixedUpdate(Action action)
+        {
+            OnFixedUpdate += action;
+        }
+        /// <summary>
+        /// Unregister a registerd method for FixedUpdate()
+        /// </summary>
+        public static void UnRegisterFixedUpdate(Action action)
+        {
+            OnFixedUpdate -= action;
+        }
+        /// <summary>
+        /// Register or Unregister a method for FixedUpdate() based on bool <paramref name="register"/>
+        /// </summary>
+        public static void ManageFixedUpdate(Action action, bool register)
+        {
+            if (register)
+            {
+                RegisterFixedUpdate(action);
+            }
+            else
+            {
+                UnRegisterFixedUpdate(action);
+            }
+        }
+
+        #endregion
+
+
+        public static void CreateLateOnDestroyCallback(Action action)
+        {
+            OnLateDestroy += action;
+        }
+        public static void CreateLateOnApplicationQuitCallback(Action action)
+        {
+            OnLateApplicationQuit += action;
+        }
+
+
+        /// <summary>
+        /// Handle Update Callbacks and batch them for every script by an event based register system
+        /// </summary>
+        private class UpdateCallbackManager : MonoBehaviour
+        {
+            public void Init()
+            {
+                gameObject.isStatic = true;
+                StartCoroutine(UpdateLoop());
+            }
+
+            private IEnumerator UpdateLoop()
+            {
+                float fixedAccumulator = 0f;
+                float fixedDelta = Time.fixedDeltaTime;
+
+                while (true)
+                {
+                    // Update
+                    OnUpdate?.Invoke();
+
+                    // FixedUpdate
+                    fixedAccumulator += Time.deltaTime;
+                    while (fixedAccumulator >= fixedDelta)
+                    {
+                        OnFixedUpdate?.Invoke();
+                        fixedAccumulator -= fixedDelta;
+                    }
+
+                    // LateUpdate
+                    OnLateUpdate?.Invoke();
+
+                    if (OnLateDestroy != null)
+                    {
+                        OnLateDestroy.Invoke();
+                        OnLateDestroy = null;
+                    }
+
+                    yield return null;
+                }
+            }
+
+            private void OnApplicationQuit()
+            {
+                OnLateUpdate += () =>
+                {
+                    if (OnLateApplicationQuit != null)
+                    {
+                        OnLateApplicationQuit.Invoke();
+                        OnLateApplicationQuit = null;
+                    }
+                };
+            }
+            private void OnDestroy()
+            {
+                OnUpdate = null;
+                OnLateUpdate = null;
+                OnFixedUpdate = null;
+
+                StopAllCoroutines();
+            }
         }
     }
+#pragma warning restore UDR0002
+#pragma warning restore UDR0004
 }

@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 
 
-public class LoadingTextAnimator : MonoBehaviour
+public class LoadingTextAnimator : UpdateMonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI loadingTextObj;
     [SerializeField] private float animationSpeed = 0.5f;
@@ -17,11 +17,8 @@ public class LoadingTextAnimator : MonoBehaviour
         time = animationSpeed * 2;
     }
 
-    private void OnEnable() => UpdateScheduler.RegisterUpdate(OnUpdate);
-    private void OnDisable() => UpdateScheduler.RegisterUpdate(OnUpdate);
 
-
-    private void OnUpdate()
+    protected override void OnUpdate()
     {
         time += Time.deltaTime;
 

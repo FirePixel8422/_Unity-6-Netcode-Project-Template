@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using Fire_Pixel.Utility;
+using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
@@ -8,8 +9,8 @@ namespace FirePixel.Networking
 {
     public class PingChecker : NetworkBehaviour
     {
-        [SerializeField] private float updateInterval = 0.5f; // How often to update the ping display
-        private float elapsedTime = 0f;
+        [SerializeField] private float updateInterval = 0.5f;
+        private float updateGlobalTime = 0f;
 
         private TextMeshProUGUI pingTextObj;
         private UnityTransport transport;
@@ -28,10 +29,9 @@ namespace FirePixel.Networking
 
         private void OnFixedUpdate()
         {
-            elapsedTime += Time.fixedDeltaTime;
-            if (elapsedTime < updateInterval || IsSpawned == false || MessageHandler.Instance == null) return;
+            if (updateGlobalTime > Time.time|| IsSpawned == false || MessageHandler.Instance == null) return;
 
-            elapsedTime = 0;
+            updateGlobalTime += updateInterval;
 
             ulong pingMs = transport.GetCurrentRtt(serverClientId);
 

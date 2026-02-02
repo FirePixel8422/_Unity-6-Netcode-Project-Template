@@ -24,7 +24,7 @@ public class ColorSwapper : MonoBehaviour
         {
             if (comp.TryGetComponent(out Image image))
             {
-                if (image.color == colorA)
+                if (Vector4.Distance(image.color, colorA) < 0.05f)
                 {
                     image.color = colorB;
                 }
@@ -43,7 +43,7 @@ public class ColorSwapper : MonoBehaviour
         {
             if (comp.TryGetComponent(out Image image))
             {
-                if (image.color == colorB)
+                if (Vector4.Distance(image.color, colorB) < 0.05f)
                 {
                     image.color = colorA;
                 }

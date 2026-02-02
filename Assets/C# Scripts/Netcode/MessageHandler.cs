@@ -11,10 +11,7 @@ namespace FirePixel.Networking
     public class MessageHandler : SmartNetworkBehaviour
     {
         public static MessageHandler Instance { get; private set; }
-        private void Awake()
-        {
-            Instance = this;
-        }
+        
 
         [SerializeField] private InputActionReference confirmAction;
 
@@ -47,8 +44,9 @@ namespace FirePixel.Networking
             confirmAction.action.Disable();
         }
 
-        public override void OnNetworkSpawn()
+        private void Awake()
         {
+            Instance = this;
             inputField = GetComponentInChildren<TMP_InputField>();
         }
 
@@ -62,7 +60,7 @@ namespace FirePixel.Networking
             while (Vector3.Distance(transform.localPosition, pos) > 0.001f)
             {
                 yield return null;
-                transform.localPosition = VectorLogic.InstantMoveTowards(transform.localPosition, pos, toggleSpeed * Time.deltaTime);
+                transform.localPosition = Vector3.MoveTowards(transform.localPosition, pos, toggleSpeed * Time.deltaTime);
             }
         }
         /// <summary>
@@ -70,7 +68,7 @@ namespace FirePixel.Networking
         /// </summary>
         public void OnConfirm(InputAction.CallbackContext ctx)
         {
-            if (isNetworkSystemInitilized == false || active == false || ctx.performed == false || string.IsNullOrEmpty(inputField.text)) return;
+            if (IsNetworkSystemInitilized == false || active == false || ctx.performed == false || string.IsNullOrEmpty(inputField.text)) return;
 
             SendTextGlobal_ServerRPC(LocalClientGameId, LocalUserName, inputField.text);
 

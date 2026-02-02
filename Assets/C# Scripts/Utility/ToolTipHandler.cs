@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class TooltipManager : MonoBehaviour
+
+public class TooltipManager : UpdateMonoBehaviour
 {
     public static TooltipManager Instance { get; private set; }
 
@@ -26,8 +26,6 @@ public class TooltipManager : MonoBehaviour
     private bool updated;
 
 
-    public void OnEnable() => UpdateScheduler.RegisterUpdate(OnUpdate);
-    public void OnDisable() => UpdateScheduler.UnRegisterUpdate(OnUpdate);
 
     private void Start()
     {
@@ -52,7 +50,7 @@ public class TooltipManager : MonoBehaviour
         activeTooltip.SetActive(false);
     }
 
-    private void OnUpdate()
+    protected override void OnUpdate()
     {
         Vector3 mousePos = Input.mousePosition;
         Vector2 screenSize = new Vector2(Screen.width, Screen.height);
