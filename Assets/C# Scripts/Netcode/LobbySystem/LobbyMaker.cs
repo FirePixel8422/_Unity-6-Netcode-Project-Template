@@ -28,7 +28,7 @@ namespace FirePixel.Networking
 
 
         [Header("Scene to load when joining or creating a lobby\nLeave empty for no scene load")]
-        [SerializeField] private string nextSceneName = "Pre-MainGame";
+        [SerializeField] private string nextSceneName;
         [SerializeField] private GameObject invisibleScreenCover;
         [SerializeField] private GameObject rejoinMenu;
 
@@ -38,6 +38,13 @@ namespace FirePixel.Networking
         private CancellationTokenSource lobbySearchCts;
         private bool inSearchLobbyScreen = false;
 
+        public const string JOINCODE_STR = "JoinCode";
+        public const string LOBBY_TERMINATED_STR = "LobbyTerminated";
+        public const string LOBBY_LAST_HEARTBEAT_STR = "LobbyLastHeartbeatUTC";
+
+        public const string PLAYERGUID_PATH = "PlayerGUID.fpx";
+        public const string REJOINDATA_PATH = "RejoinData.fpx";
+
 
         private void Start()
         {
@@ -46,40 +53,51 @@ namespace FirePixel.Networking
         }
         private async Task InitializeAsync()
         {
-            (bool playerGUIDExists, ValueWrapper<string> playerGUID) = await FileManager.LoadInfoAsync<ValueWrapper<string>>("PlayerGUID.json");
+            (bool playerGUIDExists, ValueWrapper<string> playerGUID) = await FileManager.LoadInfoAsync<ValueWrapper<string>>(PLAYERGUID_PATH);
             if (false && playerGUIDExists)
             {
                 ClientManager.SetPlayerGUID(playerGUID.Value);
             }
             else
             {
-                string newGUID = System.Guid.NewGuid().ToString();
+                string newGUID = Guid.NewGuid().ToString();
 
                 ClientManager.SetPlayerGUID(newGUID);
 
-                await FileManager.SaveInfoAsync(new ValueWrapper<string>(newGUID), "PlayerGUID.json");
+                await FileManager.SaveInfoAsync(new ValueWrapper<string>(newGUID), PLAYERGUID_PATH);
             }
 
-            (bool rejoinFileExists, ValueWrapper<string> lastJoinedLobbyId) = await FileManager.LoadInfoAsync<ValueWrapper<string>>("RejoinData.json");
+            (bool rejoinFileExists, ValueWrapper<string> lastJoinedLobbyId) = await FileManager.LoadInfoAsync<ValueWrapper<string>>(REJOINDATA_PATH);
             if (rejoinFileExists)
             {
                 try
                 {
                     Lobby lobby = await LobbyService.Instance.GetLobbyAsync(lastJoinedLobbyId.Value);
 
-                    // If lobby was found, check if it still has a host (eg not marked for termination)
-                    bool lobbyExists = lobby != null && lobby.Data["LobbyTerminated"].Value == "false";
+                    bool lobbyAlive =
+                        lobby != null &&
+                        DateTime.UtcNow.Ticks - long.Parse(lobby.Data[LOBBY_LAST_HEARTBEAT_STR].Value) < TimeSpan.FromSeconds(30).Ticks;
 
-                    if (lobbyExists)
+                    if (lobbyAlive)
                     {
                         // Turn rejoin menu visible and setup rejoin button to call method
                         rejoinMenu.SetActive(true);
                         rejoinMenu.GetComponentInChildren<Button>().onClick.AddListener(() => _ = RejoinLobbyAsync(lastJoinedLobbyId.Value));
                     }
+                    else
+                    {
+                        // Destroy the rejoin reference if the lobby doesnt exist (anymore)
+                        FileManager.TryDeleteFile(REJOINDATA_PATH);
+
+                        DebugLogger.Log("Lobby is null", lobby == null);
+                        DebugLogger.Log("Heartbeat: " + long.Parse(lobby.Data[LOBBY_LAST_HEARTBEAT_STR].Value));
+                        DebugLogger.Log("Global: " + DateTime.UtcNow.Ticks);
+                    }
                 }
                 catch (LobbyServiceException e)
                 {
                     DebugLogger.Log("No rejoinable lobby detected:\n" + e.ToString());
+                    FileManager.TryDeleteFile(REJOINDATA_PATH);
                 }
             }
         }
@@ -88,7 +106,6 @@ namespace FirePixel.Networking
         {
             inSearchLobbyScreen = _inSearchLobbyScreen;
         }
-
         private async Task SearchLobbiesTimerAsync()
         {
             lobbySearchCts?.Cancel(); // Cancel any previous loop
@@ -150,20 +167,25 @@ namespace FirePixel.Networking
 
                 CreateLobbyOptions options = new CreateLobbyOptions
                 {
-                    IsPrivate = MatchManager.Instance.settings.privateLobby,
+                    IsPrivate = false,
                     IsLocked = false,
 
                     Data = new Dictionary<string, DataObject>()
                     {
                         {
-                            "joinCode", new DataObject(
+                            JOINCODE_STR, new DataObject(
                             visibility: DataObject.VisibilityOptions.Public,
                             value: _hostData.JoinCode)
                         },
                         {
-                            "LobbyTerminated", new DataObject(
+                            LOBBY_TERMINATED_STR, new DataObject(
                             visibility: DataObject.VisibilityOptions.Public,
                             value: "false")
+                        },
+                        {
+                            LOBBY_LAST_HEARTBEAT_STR, new DataObject(
+                            visibility: DataObject.VisibilityOptions.Public,
+                            value: "0")
                         },
                     }
                 };
@@ -200,13 +222,14 @@ namespace FirePixel.Networking
 
         public void LoadNextScene()
         {
-            if (string.IsNullOrEmpty(nextSceneName) == false)
+            if (string.IsNullOrEmpty(nextSceneName))
             {
-                // Load next scene through network, so all joining clients will also load it automatically
-                SceneManager.LoadSceneOnNetwork_OnServer(nextSceneName);
+                DebugLogger.LogError("Error scene name is invalid", string.IsNullOrEmpty(nextSceneName));
+                return;
             }
 
-            DebugLogger.LogError("Error scene name is invalid", string.IsNullOrEmpty(nextSceneName));
+            // Load next scene through network, so all joining clients will also load it automatically
+            SceneManager.LoadSceneOnNetwork_OnServer(nextSceneName);
         }
 
 
@@ -232,7 +255,7 @@ namespace FirePixel.Networking
 
                 await LobbyManager.SetLobbyData(lobby, false);
 
-                string joinCode = lobby.Data["joinCode"].Value;
+                string joinCode = lobby.Data[JOINCODE_STR].Value;
                 JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
 
@@ -275,27 +298,27 @@ namespace FirePixel.Networking
                 QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
                 {
                     Filters = new List<QueryFilter>
-                {
-                    //Only get open lobbies (non private)
-                    new QueryFilter(
-                        field: QueryFilter.FieldOptions.AvailableSlots,
-                        op: QueryFilter.OpOptions.GT,
-                        value: "-1"),
+                    {
+                        //Only get open lobbies (non private)
+                        new QueryFilter(
+                            field: QueryFilter.FieldOptions.AvailableSlots,
+                            op: QueryFilter.OpOptions.GT,
+                            value: "-1"),
 
-                    //Only show non locked lobbies (lobbies that are not yet in a started match)
-                     new QueryFilter(
-                         field: QueryFilter.FieldOptions.IsLocked,
-                         op: QueryFilter.OpOptions.EQ,
-                         value: "false"),
-                },
+                        //Only show non locked lobbies (lobbies that are not yet in a started match)
+                         new QueryFilter(
+                             field: QueryFilter.FieldOptions.IsLocked,
+                             op: QueryFilter.OpOptions.EQ,
+                             value: "false"),
+                    },
 
                     Order = new List<QueryOrder>
-                {
-                    //Show the oldest lobbies first
-                    new QueryOrder(true, QueryOrder.FieldOptions.Created),
-                    //
-                    new QueryOrder(false, QueryOrder.FieldOptions.AvailableSlots),
-                }
+                    {
+                        //Show the oldest lobbies first
+                        new QueryOrder(true, QueryOrder.FieldOptions.Created),
+                        //
+                        new QueryOrder(false, QueryOrder.FieldOptions.AvailableSlots),
+                    }
                 };
 
                 QueryResponse response = await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
@@ -330,7 +353,7 @@ namespace FirePixel.Networking
 
                 await LobbyManager.SetLobbyData(lobby);
 
-                string joinCode = lobby.Data["joinCode"].Value;
+                string joinCode = lobby.Data[JOINCODE_STR].Value;
                 JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
                 RelayJoinData _joinData = new RelayJoinData
@@ -372,7 +395,7 @@ namespace FirePixel.Networking
             {
                 Lobby lobby = await LobbyService.Instance.ReconnectToLobbyAsync(lobbyId);
 
-                string joinCode = lobby.Data["joinCode"].Value;
+                string joinCode = lobby.Data[JOINCODE_STR].Value;
                 JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
                 RelayJoinData _joinData = new RelayJoinData

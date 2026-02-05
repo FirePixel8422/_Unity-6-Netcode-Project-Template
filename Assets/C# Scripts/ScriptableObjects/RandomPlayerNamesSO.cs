@@ -4,8 +4,7 @@ using UnityEngine;
 
 [CreateAssetMenu(fileName = "Funny Names", menuName = "ScriptableObjects/AutoNamesSO", order = -1000)]
 public class RandomPlayerNamesSO : ScriptableObject
-{
-    
+{    
     [SerializeField] private string[] funnyNames = new string[]
     {
         "JohnDoe",

@@ -58,31 +58,26 @@ namespace FirePixel.Networking
 
 
 
-        public async void KickClientOrLeaveAsync(int toKickClientNetworkId)
+        public void KickClientOrLeaveAsync(ulong toKickClientNetworkId)
         {
             if (IsServer)
             {
                 // If the client to kick is the host, disconnect all clients and shutdown the network.
                 if (toKickClientNetworkId == 0)
                 {
-                    ClientManager.Instance.DisconnectAllClients_ServerRPC();
-
-                    // Terminate lobby and shutdown network.
-                    await LobbyManager.DeleteLobbyAsync_OnServer();
-
-                    NetworkManager.Shutdown();
+                    ClientManager.Instance.ShutDownNetwork_ServerRPC();
                 }
                 // If the client to kick is not the host, just disconnect that client.
                 else
                 {
                     // Disconect client
-                    ClientManager.Instance.DisconnectClient_ServerRPC(toKickClientNetworkId);
+                    ClientManager.Instance.KickTargetClient_ServerRPC(toKickClientNetworkId);
                 }
             }
             else
             {
                 // Diconnect self
-                ClientManager.Instance.DisconnectClient_ServerRPC(toKickClientNetworkId);
+                ClientManager.Instance.KickTargetClient_ServerRPC(toKickClientNetworkId);
             }
         }
 
@@ -96,18 +91,18 @@ namespace FirePixel.Networking
         }
 
 
-        private void OnClientDisconnected_OnServer(ulong clientNetworkId, int clientGameId, int newClientCount)
+        private void OnClientDisconnected_OnServer(ClientSessionContext ctx)
         {
-            DebugLogger.Log(clientGameId + " left, " + newClientCount + " Client left");
+            DebugLogger.Log(ctx.GameId + " left, " + ctx.PlayerCount + " Client left");
 
-            for (int i = clientGameId; i < newClientCount; i++)
+            for (int i = ctx.GameId; i < ctx.PlayerCount; i++)
             {
                 //move down all the networkIds in the array by 1.
                 _savedFixedClientNames[i] = _savedFixedClientNames[i + 1];
             }
-            _savedFixedClientNames[newClientCount] = "";
+            _savedFixedClientNames[ctx.PlayerCount] = "";
 
-            SyncClientNames_ClientRPC(_savedFixedClientNames, newClientCount);
+            SyncClientNames_ClientRPC(_savedFixedClientNames, ctx.PlayerCount);
         }
 
 

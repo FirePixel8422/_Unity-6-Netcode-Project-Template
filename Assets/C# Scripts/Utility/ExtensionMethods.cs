@@ -12,14 +12,10 @@ public static class ExtensionMethods
 {
     #region Invoke
 
-    /// <summary>
-    /// Call function after a delay
-    /// </summary>
     public static void Invoke(this MonoBehaviour mb, float delay, Action f)
     {
         mb.StartCoroutine(InvokeRoutine(delay, f));
     }
-
     public static void Invoke<T>(this MonoBehaviour mb, float delay, Action<T> f, T param)
     {
         mb.StartCoroutine(InvokeRoutine(delay, f, param));
@@ -30,7 +26,6 @@ public static class ExtensionMethods
         yield return new WaitForSeconds(delay);
         f.Invoke();
     }
-
     private static IEnumerator InvokeRoutine<T>(float delay, Action<T> f, T param)
     {
         yield return new WaitForSeconds(delay);
@@ -436,5 +431,15 @@ public static class ExtensionMethods
     public static T SelectRandom<T>(this T[] targetArray)
     {
         return targetArray[UnityEngine.Random.Range(0, targetArray.Length)];
+    }
+
+    /// <summary>
+    /// Modifies a struct element in a list safely by copying, running the modifier, then writing it back.
+    /// </summary>
+    public static void ModifyAt<T>(this List<T> list, int index, Action<T> modifier) where T : struct
+    {
+        T copy = list[index];
+        modifier(copy);
+        list[index] = copy;
     }
 }

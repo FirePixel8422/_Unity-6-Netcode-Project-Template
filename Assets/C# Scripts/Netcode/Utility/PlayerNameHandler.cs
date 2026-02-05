@@ -11,10 +11,12 @@ namespace FirePixel.Networking
 
         [SerializeField] private RandomPlayerNamesSO randomPlayerNames;
 
+        private const string PLAYERNAME_PATH = "PlayerName.fpx";
+
 
         private async void Awake()
         {
-            (bool success, ValueWrapper<string> savedPlayerName) = await FileManager.LoadInfoAsync<ValueWrapper<string>>("PlayerName.fpx");
+            (bool success, ValueWrapper<string> savedPlayerName) = await FileManager.LoadInfoAsync<ValueWrapper<string>>(PLAYERNAME_PATH);
 
             if (success)
             {
@@ -42,13 +44,13 @@ namespace FirePixel.Networking
                 previewTextField.text = funnyName;
                 ClientManager.SetLocalUsername(funnyName);
 
-                FileManager.TryDeleteFile("PlayerName.fpx");
+                FileManager.TryDeleteFile(PLAYERNAME_PATH);
 
                 return;
             }
 
             ClientManager.SetLocalUsername(newValue);
-            await FileManager.SaveInfoAsync(new ValueWrapper<string>(newValue), "PlayerName.fpx");
+            await FileManager.SaveInfoAsync(new ValueWrapper<string>(newValue), PLAYERNAME_PATH);
         }
     }
 }

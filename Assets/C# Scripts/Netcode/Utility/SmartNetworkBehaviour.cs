@@ -1,4 +1,5 @@
 ﻿using Unity.Netcode;
+using UnityEngine;
 
 
 namespace FirePixel.Networking
@@ -6,12 +7,12 @@ namespace FirePixel.Networking
     /// <summary>
     /// Extended version of <see cref="NetworkBehaviour"/> with easy access to local client info and network systems setup callback. (Warning, MUST Call base.OnNetworkSpawn() if overriden)
     /// </summary>
-    public class SmartNetworkBehaviour : NetworkBehaviour
+    public abstract class SmartNetworkBehaviour : NetworkBehaviour
     {
         /// <summary>
         /// True 
         /// </summary>
-        public bool IsNetworkSystemInitilized;
+        [HideInInspector] public bool IsNetworkSystemInitilized;
 
 
         #region Usefull quick acces to data
@@ -63,7 +64,10 @@ namespace FirePixel.Networking
 
         public override void OnDestroy()
         {
-            NetworkManager.NetworkTickSystem.Tick -= OnNetworkTick;
+            if (IsSpawned && NetworkManager != null && NetworkManager.NetworkTickSystem != null)
+            {
+                NetworkManager.NetworkTickSystem.Tick -= OnNetworkTick;
+            }
         }
     }
 }

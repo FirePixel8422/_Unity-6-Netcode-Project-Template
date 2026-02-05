@@ -127,15 +127,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 840134738611709233, guid: aa2da3930e5c488489dd963262efde6f,
-        type: 3}
-      propertyPath: UITransform
-      value: 
-      objectReference: {fileID: 1227430496}
     - target: {fileID: 3088868075374821422, guid: aa2da3930e5c488489dd963262efde6f,
         type: 3}
       propertyPath: m_Name
-      value: MatchManagement
+      value: '>>Netcode Management<<'
       objectReference: {fileID: 0}
     - target: {fileID: 5287381020941622744, guid: aa2da3930e5c488489dd963262efde6f,
         type: 3}
@@ -4842,12 +4837,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1304928096739069418}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 137d62ac59c6d11488462dd4787eade9, type: 3}
+  m_Script: {fileID: 11500000, guid: 2381e9be58ec54c4aaa8bb44e9e7e3f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   nameInputField: {fileID: 2667414720792394601}
   previewTextField: {fileID: 244088539743759644}
-  nameChosen: 0
   randomPlayerNames: {fileID: 11400000, guid: 5860e335346303f4198c877a3f240a2c, type: 2}
 --- !u!1 &6942660419197203838
 GameObject:

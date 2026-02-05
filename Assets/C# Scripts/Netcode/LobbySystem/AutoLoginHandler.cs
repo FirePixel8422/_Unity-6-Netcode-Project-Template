@@ -26,9 +26,12 @@ namespace FirePixel.Networking
 
             await UnityServices.InitializeAsync();
 
-            AuthenticationService.Instance.SignOut();
+            //AuthenticationService.Instance.SignOut();
 
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+            //DebugLogger.Log("Logged into saved account!");
+            //Debug.Log("Player ID: " + AuthenticationService.Instance.PlayerId);
 
             mainSceneLoadOperation.allowSceneActivation = true;
         }

@@ -30,6 +30,11 @@ namespace FirePixel.Networking
 
             usernamesOnServer = new string[maxPlayerCount];
             guidsOnServer = new string[maxPlayerCount];
+            for (int i = 0; i < maxPlayerCount; i++)
+            {
+                usernamesOnServer[i] = string.Empty;
+                guidsOnServer[i] = string.Empty;
+            }
 
             playerCount = 0;
         }
@@ -123,6 +128,39 @@ namespace FirePixel.Networking
         {
             serializer.SerializeValue(ref networkIds);
             serializer.SerializeValue(ref playerCount);
+
+            SerializeStringArray(serializer, ref usernamesOnServer);
+            SerializeStringArray(serializer, ref guidsOnServer);
+        }
+
+        private void SerializeStringArray<T>(BufferSerializer<T> serializer, ref string[] array) where T : IReaderWriter
+        {
+            if (serializer.IsReader)
+            {
+                int length = 0;
+                serializer.SerializeValue(ref length);
+                array = new string[length];
+                for (int i = 0; i < length; i++)
+                {
+                    int strLen = 0;
+                    serializer.SerializeValue(ref strLen);
+                    byte[] bytes = new byte[strLen];
+                    serializer.SerializeValue(ref bytes);
+                    array[i] = System.Text.Encoding.UTF8.GetString(bytes);
+                }
+            }
+            else
+            {
+                int length = array.Length;
+                serializer.SerializeValue(ref length);
+                for (int i = 0; i < length; i++)
+                {
+                    byte[] bytes = System.Text.Encoding.UTF8.GetBytes(array[i]);
+                    int strLen = bytes.Length;
+                    serializer.SerializeValue(ref strLen);
+                    serializer.SerializeValue(ref bytes);
+                }
+            }
         }
     }
 }

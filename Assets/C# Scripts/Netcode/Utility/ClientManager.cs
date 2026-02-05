@@ -1,3 +1,4 @@
+using Fire_Pixel.Utility;
 using System;
 using Unity.Netcode;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace FirePixel.Networking
 
         [Header("Log Debug information")]
         [SerializeField] private bool logDebugInfo = true;
-
+        [Space(8)]
         [SerializeField] private NetworkStruct<PlayerIdDataArray> playerIdDataArray = new NetworkStruct<PlayerIdDataArray>();
 
 
@@ -110,19 +111,14 @@ namespace FirePixel.Networking
 
 #pragma warning disable UDR0001
         /// <summary>
-        /// Invoked after NetworkManager.OnClientConnected, before updating ClientManager gameId logic. returns: ulong clientId, int clientGamId, int clientInLobbyCount
+        /// Invoked after NetworkManager.OnClientConnected, before updating ClientManager gameId logic.
         /// </summary>
-        public static Action<ulong, int, int> OnClientConnectedCallback;
+        public static Action<ClientSessionContext> OnClientConnectedCallback;
 
         /// <summary>
-        /// Invoked after <see cref="NetworkManager.OnClientDisconnectCallback"/>, before updating <see cref="ClientManager"/> gameId logic. returns: ulong clientId, int clientGamId, int clientInLobbyCount
+        /// Invoked after <see cref="NetworkManager.OnClientDisconnectCallback"/>, before updating <see cref="ClientManager"/> gameId logic.
         /// </summary>
-        public static Action<ulong, int, int> OnClientDisconnectedCallback;
-
-        /// <summary>
-        /// Invoked when a client is kicked from the server, before destroying the <see cref="ClientManager"/> gameObject.
-        /// </summary>
-        public static Action OnKicked;
+        public static Action<ClientSessionContext> OnClientDisconnectedCallback;
 #pragma warning restore UDR0001
 
         #endregion
@@ -180,7 +176,8 @@ namespace FirePixel.Networking
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
         private void SendUsernameAndGUID_ServerRPC(int fromPlayerGameId, string username, string guid)
         {
-            playerIdDataArray.SilentValue.SetUserNameAndGUID(fromPlayerGameId, username, guid);
+            playerIdDataArray.Value.SetUserNameAndGUID(fromPlayerGameId, username, guid);
+            playerIdDataArray.SetDirty();
         }
 
         #endregion
@@ -262,7 +259,12 @@ namespace FirePixel.Networking
 
             RequestUsernameAndGUID_ClientRPC(GetClientGameId(clientNetworkId), NetworkIdRPCTargets.SendToTargetClient(clientNetworkId));
 
-            OnClientConnectedCallback?.Invoke(clientNetworkId, playerIdDataArray.Value.GetPlayerGameId(clientNetworkId), NetworkManager.ConnectedClients.Count);
+            OnClientConnectedCallback?.Invoke(new ClientSessionContext()
+            {
+                NetworkId = clientNetworkId,
+                GameId = playerIdDataArray.Value.GetPlayerGameId(clientNetworkId),
+                PlayerCount = NetworkManager.ConnectedClients.Count,
+            });
 
             DebugLogger.Log("Player " + GetClientGameId(clientNetworkId) + ", (NetworkId: " + clientNetworkId + "), connected to server!", logDebugInfo);
         }
@@ -283,7 +285,12 @@ namespace FirePixel.Networking
 
             playerIdDataArray.Value = updatedDataArray;
 
-            OnClientDisconnectedCallback?.Invoke(clientNetworkId, playerIdDataArray.Value.GetPlayerGameId(clientNetworkId), PlayerCount);
+            OnClientDisconnectedCallback?.Invoke(new ClientSessionContext()
+            {
+                NetworkId = clientNetworkId,
+                GameId = playerIdDataArray.Value.GetPlayerGameId(clientNetworkId),
+                PlayerCount = PlayerCount,
+            });
         }
 
         /// <summary>
@@ -291,8 +298,8 @@ namespace FirePixel.Networking
         /// </summary>
         private void OnClientDisconnected_OnClient(ulong clientNetworkId)
         {
-            // Call function only on client who disconnected
-            if (clientNetworkId != NetworkManager.LocalClientId) return;
+            // Call function only on client who disconnected or on everyone if the host disconnected
+            if (clientNetworkId != NetworkManager.LocalClientId && clientNetworkId != 0) return;
 
             Destroy(gameObject);
 
@@ -305,7 +312,19 @@ namespace FirePixel.Networking
 
             NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected_OnClient;
 
-            // When kicked from the server, load this scene
+            // If The host disconnected
+            if (clientNetworkId == 0)
+            {
+                // Destroy the rejoin reference on the kicked client
+                bool deletionSucces = FileManager.TryDeleteFile(LobbyMaker.REJOINDATA_PATH);
+                DebugLogger.Log($"{LobbyMaker.REJOINDATA_PATH} deleted: " + deletionSucces, logDebugInfo);
+
+                if (MessageHandler.Instance != null)
+                {
+                    MessageHandler.Instance.SendTextLocal("You have been kicked from the server!");
+                }
+            }
+
             SceneManager.LoadScene(mainMenuSceneName);
 
             Cursor.lockState = CursorLockMode.None;
@@ -315,67 +334,36 @@ namespace FirePixel.Networking
         #endregion
 
 
-        #region Kick Client and kill Server Code
-
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        public void DisconnectClient_ServerRPC(int clientGameId)
+        public void KickTargetClient_ServerRPC(ulong clientNetworkId)
         {
-            ulong clientNetworkId = GetClientNetworkId(clientGameId);
-
-            GetKicked_ClientRPC(GameIdRPCTargets.SendToTargetClient(clientGameId));
-
             NetworkManager.DisconnectClient(clientNetworkId);
         }
-
+        
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        public void DisconnectAllClients_ServerRPC()
+        public void ShutDownNetwork_ServerRPC()
         {
-            GetKicked_ClientRPC(GameIdRPCTargets.SendToAll());
-        }
+            if (IsServer == false) return;
 
-        [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void GetKicked_ClientRPC(GameIdRPCTargets rpcTargets)
-        {
-            if (rpcTargets.IsTarget == false) return;
-
-            OnKicked?.Invoke();
-
-            // Destroy the rejoin reference on the kicked client
-            bool deletionSucces = FileManager.TryDeleteFile("RejoinData.json");
-
-            DebugLogger.Log("RejoinData.json deleted: " + deletionSucces, logDebugInfo);
-
-            SceneManager.LoadScene(mainMenuSceneName);
-
-            if (MessageHandler.Instance != null)
+            for (int i = 1; i < PlayerCount; i++)
             {
-                MessageHandler.Instance.SendTextLocal("You have been kicked from the server!");
+                NetworkManager.DisconnectClient(GetClientNetworkId(i));
             }
-        }
 
-        #endregion
+            // Terminate lobby and shutdown network.
+            LobbyManager.DeleteLobbyInstant_OnServer();
+            NetworkManager.Shutdown();
+        }
 
 
         public override void OnDestroy()
         {
             base.OnDestroy();
 
-            if (IsServer)
-            {
-
-                // Kick all clients, terminate lobby and shutdown network.
-                DisconnectAllClients_ServerRPC();
-
-                LobbyManager.DeleteLobbyInstant_OnServer();
-
-                NetworkManager.Shutdown();
-            }
-
             playerIdDataArray.OnValueChanged = null;
             OnClientConnectedCallback = null;
             OnClientDisconnectedCallback = null;
             OnInitialized = null;
-            OnKicked = null;
         }
     }
 }
