@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class MessageHandler : SmartNetworkBehaviour
     {
@@ -98,26 +98,26 @@ namespace FirePixel.Networking
 
 
         [ServerRpc(RequireOwnership = false)]
-        public void SendTextToClient_ServerRPC(int clientGameId, string senderName, string text)
+        public void SendTextToClient_ServerRPC(int clientGameId, string senderName, string message)
         {
-            SendTextToClient_ClientRPC(clientGameId, senderName, text);
+            SendTextToClient_ClientRPC(clientGameId, senderName, message);
         }
         [ClientRpc(RequireOwnership = false)]
-        private void SendTextToClient_ClientRPC(int clientGameId, string senderName, string text)
+        private void SendTextToClient_ClientRPC(int clientGameId, string senderName, string message)
         {
             // Send to only "toClientId"
             if (LocalClientGameId != clientGameId) return;
 
-            StartCoroutine(AddTextToChatBox(clientGameId, senderName, text));
+            StartCoroutine(AddTextToChatBox(clientGameId, senderName, message));
         }
 
 
 
-        private IEnumerator AddTextToChatBox(int clientGameId, string playerName, string text)
+        private IEnumerator AddTextToChatBox(int clientGameId, string playerName, string message)
         {
             GameObject obj = Instantiate(textBoxPrefab, chatContentHolder, false);
 
-            TextMeshProUGUI textObj = obj.GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI text = obj.GetComponent<TextMeshProUGUI>();
 
             if (clientGameId == LocalClientGameId && showLocalNameAs_You)
             {
@@ -128,12 +128,12 @@ namespace FirePixel.Networking
                 obj.GetComponent<TextMeshProUGUI>().color = serverMessagesColor;
             }
 
-            textObj.text = $"[{playerName}]: " + text.ToString();
+            text.text = $"[{playerName}]: " + message.ToString();
 
             //Set RectTransfrom Size to Fit all the text
-            Vector2 temp = (textObj.transform as RectTransform).sizeDelta;
-            temp.y = textObj.preferredHeight;
-            (textObj.transform as RectTransform).sizeDelta = temp;
+            Vector2 temp = (text.transform as RectTransform).sizeDelta;
+            temp.y = text.preferredHeight;
+            (text.transform as RectTransform).sizeDelta = temp;
 
             yield return null;
             yield return new WaitForEndOfFrame();

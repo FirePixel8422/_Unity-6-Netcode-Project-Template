@@ -4,7 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class ClientManager : NetworkBehaviour
     {
@@ -18,10 +18,16 @@ namespace FirePixel.Networking
         [Header("Scene to load when exiting a lobby for any reason")]
         [SerializeField] private string mainMenuSceneName = "MainMenu";
 
-        [Header("Log Debug information")]
-        [SerializeField] private bool logDebugInfo = true;
         [Space(8)]
         [SerializeField] private NetworkStruct<PlayerIdDataArray> playerIdDataArray = new NetworkStruct<PlayerIdDataArray>();
+
+#pragma warning disable UDR0001
+        public static OneTimeAction PostInitialized = new OneTimeAction();
+#pragma warning restore UDR0001
+
+#if Enable_Debug_Systems
+        public bool LogDebugInfo = true;
+#endif
 
 
         #region PlayerIdDataArray var get, set and sync methods
@@ -39,7 +45,7 @@ namespace FirePixel.Networking
         /// </summary>
         public static void SetPlayerIdDataArray_OnServer(PlayerIdDataArray newValue)
         {
-#if UNITY_EDITOR
+#if Enable_Debug_Systems
             DebugLogger.LogError("SetPlayerIdDataArray_OnServer called on non server Client, this should only be called from the server!", Instance.IsServer == false);
 #endif
             Instance.playerIdDataArray.Value = newValue;
@@ -48,61 +54,33 @@ namespace FirePixel.Networking
 
         private void SendPlayerIdDataArrayChange_OnServer(PlayerIdDataArray newValue)
         {
-            ReceivePlayerIdDataArray_ClientRPC(newValue, NetworkIdRPCTargets.SendToAllButServer());
+            ReceivePlayerIdDataArray_ClientRPC(newValue, RPCTargetFilters.SendToAllButHost());
         }
 
         [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void ReceivePlayerIdDataArray_ClientRPC(PlayerIdDataArray newValue, NetworkIdRPCTargets rpcTargets)
+        private void ReceivePlayerIdDataArray_ClientRPC(PlayerIdDataArray newValue, ClientRpcParams rpcParams = default)
         {
-            if (rpcTargets.IsTarget == false) return;
+            if (IsHost && RPCTargetFilters.ShouldHostSkip(rpcParams)) return;
 
             playerIdDataArray.Value = newValue;
         }
 
 
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void RequestPlayerIdDataArray_ServerRPC(ulong clientNetworkId)
+        private void RequestPlayerIdDataArray_ServerRPC(ServerRpcParams rpcParams = default)
         {
-            ReceiveSilentPlayerIdDataArray_ClientRPC(playerIdDataArray.Value, NetworkIdRPCTargets.SendToTargetClient(clientNetworkId));
+            ulong senderClientNetworkId = rpcParams.Receive.SenderClientId;
+
+            ReceiveSilentPlayerIdDataArray_ClientRPC(playerIdDataArray.Value, RPCTargetFilters.SendToTargetClient(senderClientNetworkId));
         }
 
         [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void ReceiveSilentPlayerIdDataArray_ClientRPC(PlayerIdDataArray newValue, NetworkIdRPCTargets rpcTargets)
+        private void ReceiveSilentPlayerIdDataArray_ClientRPC(PlayerIdDataArray newValue, ClientRpcParams rpcParams = default)
         {
-            if (rpcTargets.IsTarget == false) return;
+            if (IsHost && RPCTargetFilters.ShouldHostSkip(rpcParams)) return;
 
             playerIdDataArray.SilentValue = newValue;
         }
-
-        #endregion
-
-
-        #region OnInitialized Callback System
-
-#pragma warning disable UDR0001
-#pragma warning disable UDR0004
-        /// <summary>
-        /// Invoked after <see cref="ClientManager.OnNetworkSpawn"/> is called.
-        /// </summary>
-        private static Action OnInitialized;
-        private static bool initialized;
-
-        /// <summary>
-        /// Invoke action after <see cref="ClientManager.OnNetworkSpawn"/> is called or instantly if that already happened
-        /// </summary>
-        public static void GetOnInitializedCallback(Action toExecute)
-        {
-            if (initialized == false)
-            {
-                OnInitialized += toExecute;
-            }
-            else
-            {
-                toExecute.Invoke();
-            }
-        }
-#pragma warning restore UDR0001
-#pragma warning restore UDR0004
 
         #endregion
 
@@ -113,12 +91,12 @@ namespace FirePixel.Networking
         /// <summary>
         /// Invoked after NetworkManager.OnClientConnected, before updating ClientManager gameId logic.
         /// </summary>
-        public static Action<ClientSessionContext> OnClientConnectedCallback;
+        public static event Action<ClientSessionContext> OnClientConnectedCallback;
 
         /// <summary>
         /// Invoked after <see cref="NetworkManager.OnClientDisconnectCallback"/>, before updating <see cref="ClientManager"/> gameId logic.
         /// </summary>
-        public static Action<ClientSessionContext> OnClientDisconnectedCallback;
+        public static event Action<ClientSessionContext> OnClientDisconnectedCallback;
 #pragma warning restore UDR0001
 
         #endregion
@@ -166,9 +144,9 @@ namespace FirePixel.Networking
         #region Send/Recieve Username and GUID and set that data in PlayerIdDataArray
 
         [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void RequestUsernameAndGUID_ClientRPC(int fromPlayerGameId, NetworkIdRPCTargets rpcTargets)
+        private void RequestUsernameAndGUID_ClientRPC(int fromPlayerGameId, ClientRpcParams rpcParams = default)
         {
-            if (rpcTargets.IsTarget == false) return;
+            if (IsHost && RPCTargetFilters.ShouldHostSkip(rpcParams)) return;
 
             SendUsernameAndGUID_ServerRPC(fromPlayerGameId, LocalUserName, LocalPlayerGUID);
         }
@@ -176,8 +154,9 @@ namespace FirePixel.Networking
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
         private void SendUsernameAndGUID_ServerRPC(int fromPlayerGameId, string username, string guid)
         {
-            playerIdDataArray.Value.SetUserNameAndGUID(fromPlayerGameId, username, guid);
-            playerIdDataArray.SetDirty();
+            PlayerIdDataArray updatedDataArray = playerIdDataArray.Value;
+            updatedDataArray.SetUserNameAndGUID(fromPlayerGameId, username, guid);
+            playerIdDataArray.Value = updatedDataArray;
         }
 
         #endregion
@@ -206,7 +185,7 @@ namespace FirePixel.Networking
 
         public override void OnNetworkSpawn()
         {
-            playerIdDataArray = new NetworkStruct<PlayerIdDataArray>(new PlayerIdDataArray(GlobalGameData.MaxPlayers));
+            playerIdDataArray = new NetworkStruct<PlayerIdDataArray>(new PlayerIdDataArray(GlobalGameData.MAX_PLAYERS));
 
             if (IsServer)
             {
@@ -222,25 +201,30 @@ namespace FirePixel.Networking
                 // Setup server only events
                 NetworkManager.OnClientConnectedCallback += OnClientConnected_OnServer;
                 NetworkManager.OnClientDisconnectCallback += OnClientDisconnected_OnServer;
+
+                PostInitialized?.Invoke();
             }
             else
             {
                 // Catches up late joining clients with newest value
-                RequestPlayerIdDataArray_ServerRPC(NetworkManager.LocalClientId);
+                RequestPlayerIdDataArray_ServerRPC();
 
                 // On value changed event of playerIdDataArray
                 playerIdDataArray.OnValueChanged += (PlayerIdDataArray newValue) =>
                 {
                     LocalClientGameId = newValue.GetPlayerGameId(NetworkManager.LocalClientId);
                 };
+                playerIdDataArray.OnValueChanged += FinishSystemInitialization;
             }
 
             // Setup server and client event
             NetworkManager.OnClientDisconnectCallback += OnClientDisconnected_OnClient;
+        }
 
-            OnInitialized?.Invoke();
-            OnInitialized = null;
-            initialized = true;
+        private void FinishSystemInitialization(PlayerIdDataArray newValue)
+        {
+            playerIdDataArray.OnValueChanged -= FinishSystemInitialization;
+            PostInitialized?.Invoke();
         }
 
 
@@ -252,12 +236,10 @@ namespace FirePixel.Networking
         private void OnClientConnected_OnServer(ulong clientNetworkId)
         {
             PlayerIdDataArray updatedDataArray = playerIdDataArray.Value;
-
             updatedDataArray.AddPlayer(clientNetworkId);
-
             playerIdDataArray.Value = updatedDataArray;
 
-            RequestUsernameAndGUID_ClientRPC(GetClientGameId(clientNetworkId), NetworkIdRPCTargets.SendToTargetClient(clientNetworkId));
+            RequestUsernameAndGUID_ClientRPC(GetClientGameId(clientNetworkId), RPCTargetFilters.SendToTargetClient(clientNetworkId));
 
             OnClientConnectedCallback?.Invoke(new ClientSessionContext()
             {
@@ -266,7 +248,9 @@ namespace FirePixel.Networking
                 PlayerCount = NetworkManager.ConnectedClients.Count,
             });
 
-            DebugLogger.Log("Player " + GetClientGameId(clientNetworkId) + ", (NetworkId: " + clientNetworkId + "), connected to server!", logDebugInfo);
+#if Enable_Debug_Systems
+            DebugLogger.Log("Player " + GetClientGameId(clientNetworkId) + ", (NetworkId: " + clientNetworkId + "), connected to server!", LogDebugInfo);
+#endif
         }
 
         /// <summary>
@@ -274,15 +258,15 @@ namespace FirePixel.Networking
         /// </summary>
         private void OnClientDisconnected_OnServer(ulong clientNetworkId)
         {
-            DebugLogger.Log("Player " + GetClientGameId(clientNetworkId) + ", (NetworkId: " + clientNetworkId + "), disconnected from server", logDebugInfo);
+#if Enable_Debug_Systems
+            DebugLogger.Log("Player " + GetClientGameId(clientNetworkId) + ", (NetworkId: " + clientNetworkId + "), disconnected from server", LogDebugInfo);
+#endif
 
             // If the diconnecting client is the host dont update data, the server is shut down anyways.
             if (clientNetworkId == 0) return;
 
             PlayerIdDataArray updatedDataArray = GetPlayerIdDataArray();
-
             updatedDataArray.RemovePlayer(clientNetworkId);
-
             playerIdDataArray.Value = updatedDataArray;
 
             OnClientDisconnectedCallback?.Invoke(new ClientSessionContext()
@@ -315,9 +299,14 @@ namespace FirePixel.Networking
             // If The host disconnected
             if (clientNetworkId == 0)
             {
+#if Enable_Debug_Systems
                 // Destroy the rejoin reference on the kicked client
                 bool deletionSucces = FileManager.TryDeleteFile(LobbyMaker.REJOINDATA_PATH);
-                DebugLogger.Log($"{LobbyMaker.REJOINDATA_PATH} deleted: " + deletionSucces, logDebugInfo);
+                DebugLogger.Log($"{LobbyMaker.REJOINDATA_PATH} deleted: " + deletionSucces, LogDebugInfo);
+#else
+                // Destroy the rejoin reference on the kicked client
+                FileManager.TryDeleteFile(LobbyMaker.REJOINDATA_PATH);
+#endif
 
                 if (MessageHandler.Instance != null)
                 {
@@ -334,12 +323,14 @@ namespace FirePixel.Networking
         #endregion
 
 
+        #region Kick and Shutdown Methods
+
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
         public void KickTargetClient_ServerRPC(ulong clientNetworkId)
         {
             NetworkManager.DisconnectClient(clientNetworkId);
         }
-        
+
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
         public void ShutDownNetwork_ServerRPC()
         {
@@ -355,15 +346,22 @@ namespace FirePixel.Networking
             NetworkManager.Shutdown();
         }
 
+        #endregion
+
 
         public override void OnDestroy()
         {
             base.OnDestroy();
 
-            playerIdDataArray.OnValueChanged = null;
+            playerIdDataArray.ResetEventCallbacks();
             OnClientConnectedCallback = null;
             OnClientDisconnectedCallback = null;
-            OnInitialized = null;
+            PostInitialized = new OneTimeAction();
+
+            if (NetworkManager.Singleton != null)
+            {
+                NetworkManager.Singleton.Shutdown();
+            }
         }
     }
 }

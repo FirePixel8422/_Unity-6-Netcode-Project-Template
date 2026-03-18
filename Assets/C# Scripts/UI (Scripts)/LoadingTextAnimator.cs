@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class LoadingTextAnimator : UpdateMonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI loadingTextObj;
+    [SerializeField] private TextMeshProUGUI loadingtext;
     [SerializeField] private float animationSpeed = 0.5f;
 
     private string loadingText;
     private float time;
 
 
-    private void Start()
+    private void Awake()
     {
-        loadingText = loadingTextObj.text;
+        loadingText = loadingtext.text;
         time = animationSpeed * 2;
     }
 
@@ -24,6 +24,6 @@ public class LoadingTextAnimator : UpdateMonoBehaviour
 
         float dotCount = time / animationSpeed % 4;
 
-        loadingTextObj.text = loadingText + new string('.', (int)dotCount);
+        loadingtext.text = loadingText + new string('.', (int)dotCount);
     }
 }

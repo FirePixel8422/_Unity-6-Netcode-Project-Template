@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class LobbyUIPanel : MonoBehaviour
     {

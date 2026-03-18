@@ -1,18 +1,16 @@
-﻿using Unity.Netcode;
-using UnityEngine;
+﻿using Fire_Pixel.Utility;
+using Unity.Netcode;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     /// <summary>
     /// Extended version of <see cref="NetworkBehaviour"/> with easy access to local client info and network systems setup callback. (Warning, MUST Call base.OnNetworkSpawn() if overriden)
     /// </summary>
     public abstract class SmartNetworkBehaviour : NetworkBehaviour
     {
-        /// <summary>
-        /// True 
-        /// </summary>
-        [HideInInspector] public bool IsNetworkSystemInitilized;
+        public bool IsNetworkSystemInitilized { get; private set; }
+        private bool isPostSpawnReady;
 
 
         #region Usefull quick acces to data
@@ -42,19 +40,38 @@ namespace FirePixel.Networking
 
         public override void OnNetworkSpawn()
         {
-            ClientManager.GetOnInitializedCallback(() => 
+            ClientManager.PostInitialized += () => 
             {
                 IsNetworkSystemInitilized = true;
-                OnNetworkSystemsSetup(); 
-            });
+                OnNetworkSystemsSetup();
 
-            NetworkManager.NetworkTickSystem.Tick += OnNetworkTick;
+                if (isPostSpawnReady)
+                {
+                    OnNetworkSystemsSetupPostStart();
+                }
+                isPostSpawnReady = true;
+            };
+
+            CallbackScheduler.RegisterNetworkTick(OnNetworkTick);
+        }
+        private void Start()
+        {
+            if (isPostSpawnReady)
+            {
+                OnNetworkSystemsSetupPostStart();
+            }
+            isPostSpawnReady = true;
         }
 
         /// <summary>
-        /// Called After all custom build NetworkSystems have been setup through <see cref="ClientManager.OnInitialized"/>
+        /// Called After all custom NetworkSystems have been setup through <see cref="ClientManager.PostInitialized"/>
         /// </summary>
         protected virtual void OnNetworkSystemsSetup() { }
+
+        /// <summary>
+        /// Called after OnNetworkSystemsSetup() and Start().
+        /// </summary>
+        protected virtual void OnNetworkSystemsSetupPostStart() { }
 
         /// <summary>
         /// Called before every network tick (before all scheduled RPCs are executed)
@@ -64,9 +81,9 @@ namespace FirePixel.Networking
 
         public override void OnDestroy()
         {
-            if (IsSpawned && NetworkManager != null && NetworkManager.NetworkTickSystem != null)
+            if (IsSpawned)
             {
-                NetworkManager.NetworkTickSystem.Tick -= OnNetworkTick;
+                CallbackScheduler.UnRegisterNetworkTick(OnNetworkTick);
             }
         }
     }

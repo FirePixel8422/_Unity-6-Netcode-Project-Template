@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     [Tooltip("Data container for hosting a server")]
     public struct RelayHostData

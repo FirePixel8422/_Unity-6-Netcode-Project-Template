@@ -10,6 +10,8 @@ using UnityEngine;
 /// </summary>
 public static class FileManager
 {
+    public const bool LOG_FILE_OPERATIONS = GlobalGameData.LOG_FILE_OPERATIONS;
+
     /// <summary>
     /// Method to get all file names of a specific type in a directory
     /// </summary>
@@ -29,7 +31,7 @@ public static class FileManager
         }
         else
         {
-            DebugLogger.LogWarning("Directory does not exist: " + directoryPath);
+            DebugLogger.LogWarning("Directory does not exist: " + directoryPath, LOG_FILE_OPERATIONS);
             return (false, default); // Returns false and an empty array if the directory doesn't exist
         }
     }
@@ -57,7 +59,7 @@ public static class FileManager
         // No files found in directory with correct fileExtension
         else
         {
-            DebugLogger.LogWarning($"No files with extension '{fileExtension}' found in directory: {directoryPath}");
+            DebugLogger.LogWarning($"No files with extension '{fileExtension}' found in directory: {directoryPath}", LOG_FILE_OPERATIONS);
             return (false, default);
         }
     }
@@ -102,7 +104,7 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            DebugLogger.LogError("Failed to save game data: " + ex.Message);
+            DebugLogger.LogError("Failed to save game data: " + ex.Message, LOG_FILE_OPERATIONS);
         }
     }
 
@@ -143,13 +145,13 @@ public static class FileManager
             }
             catch (Exception ex)
             {
-                DebugLogger.LogError("Failed to load file: " + ex.Message);
+                DebugLogger.LogError("Failed to load file: " + ex.Message, LOG_FILE_OPERATIONS);
                 return (false, default);
             }
         }
         else
         {
-            DebugLogger.LogWarning("No file found at: " + path);
+            DebugLogger.LogWarning("No file found at: " + path, LOG_FILE_OPERATIONS);
             return (false, default);
         }
     }
@@ -173,13 +175,13 @@ public static class FileManager
             }
             else
             {
-                DebugLogger.LogWarning($"File not found: {path}");
+                DebugLogger.LogWarning($"File not found: {path}", LOG_FILE_OPERATIONS);
                 return false;
             }
         }
         catch (IOException ex)
         {
-            DebugLogger.LogError($"Failed to delete file {path}: {ex.Message}");
+            DebugLogger.LogError($"Failed to delete file {path}: {ex.Message}", LOG_FILE_OPERATIONS);
             return false;
         }
     }
@@ -198,18 +200,18 @@ public static class FileManager
             {
                 Directory.Delete(directoryPath, true); // Deletes the directory
 
-                DebugLogger.Log($"Directory deleted: {directoryPath}");
+                DebugLogger.Log($"Directory deleted: {directoryPath}", LOG_FILE_OPERATIONS);
                 return true;
             }
             else
             {
-                DebugLogger.LogWarning($"Directory not found: {directoryPath}");
+                DebugLogger.LogWarning($"Directory not found: {directoryPath}", LOG_FILE_OPERATIONS);
                 return false;
             }
         }
         catch (IOException ex)
         {
-            DebugLogger.LogError($"Failed to delete directory {directoryPath}: {ex.Message}");
+            DebugLogger.LogError($"Failed to delete directory {directoryPath}: {ex.Message}", LOG_FILE_OPERATIONS);
             return false;
         }
     }
@@ -269,7 +271,7 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            DebugLogger.LogError($"Failed to save editor file: {ex.Message}");
+            DebugLogger.LogError($"Failed to save editor file: {ex.Message}", LOG_FILE_OPERATIONS);
         }
     }
 
@@ -281,7 +283,7 @@ public static class FileManager
         string path = GetEditorPath(fileName);
         if (!File.Exists(path))
         {
-            DebugLogger.LogWarning($"Editor file not found: {path}");
+            DebugLogger.LogWarning($"Editor file not found: {path}", LOG_FILE_OPERATIONS);
             return (false, default);
         }
 
@@ -294,7 +296,7 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            DebugLogger.LogError($"Failed to load editor file: {ex.Message}");
+            DebugLogger.LogError($"Failed to load editor file: {ex.Message}", LOG_FILE_OPERATIONS);
             return (false, default);
         }
     }
@@ -316,22 +318,22 @@ public struct ValueWrapper<T>
 [System.Serializable]
 public struct ArrayWrapper<T>
 {
-    public T[] Array;
+    public T[] Value;
 
     public ArrayWrapper(T[] _values)
     {
-        Array = _values;
+        Value = _values;
     }
     public ArrayWrapper(int length)
     {
-        Array = new T[length];
+        Value = new T[length];
     }
 
-    public T this[int index]
+    public readonly T this[int index]
     {
-        get => Array[index];
-        set => Array[index] = value;
+        get => Value[index];
+        set => Value[index] = value;
     }
 
-    public int Length => Array?.Length ?? 0;
+    public readonly int Length => Value?.Length ?? 0;
 }

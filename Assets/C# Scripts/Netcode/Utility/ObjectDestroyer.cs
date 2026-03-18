@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class ObjectDestroyer : NetworkBehaviour
     {

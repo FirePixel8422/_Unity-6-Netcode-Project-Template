@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     /// <summary>
     /// Netcode compatible wrapper for values (ints, floats, etc). Adds an OnValueChanged event that can be used to notify when the value changes.
@@ -14,7 +14,7 @@ namespace FirePixel.Networking
     {
         [SerializeField] private T value;
 
-        public Action<T> OnValueChanged;
+        public event Action<T> OnValueChanged;
 
         public T Value
         {
@@ -25,10 +25,22 @@ namespace FirePixel.Networking
                 OnValueChanged?.Invoke(value);
             }
         }
+        public T SilentValue
+        {
+            get => value;
+            set
+            {
+                this.value = value;
+            }
+        }
 
         public void SetDirty()
         {
             OnValueChanged?.Invoke(value);
+        }
+        public void ResetEventCallbacks()
+        {
+            OnValueChanged = null;
         }
 
         /// <summary>

@@ -3,48 +3,51 @@ using Unity.Netcode;
 using TMPro;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class PlayerNameDisplayer : NetworkBehaviour
     {
-        [SerializeField] private TextMeshProUGUI player1, player2;
+        [SerializeField] private TextMeshProUGUI localNameText, oponnentNameText;
 
 
 
-        public override void OnNetworkSpawn()
+        private void Awake()
         {
-            ulong playerNetworkId = NetworkManager.LocalClientId;
+            MatchManager.PostMatchStarted += OnGameStarted;
+        }
+        private void OnGameStarted()
+        {
             string userName = ClientManager.LocalUserName;
 
-            UpdateUserName(playerNetworkId, userName);
-            SendPlayerName_ServerRPC(playerNetworkId, userName);
+            UpdateUserName_Local(userName, NetworkManager.LocalClientId);
+            SendPlayerName_ServerRPC(userName);
         }
 
 
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void SendPlayerName_ServerRPC(ulong playerNetworkId, string userName)
+        private void SendPlayerName_ServerRPC(string userName, ServerRpcParams rpcParams = default)
         {
-            SendPlayerName_ClientRPC(playerNetworkId, userName);
+            ulong clientNetworkId = rpcParams.Receive.SenderClientId;
+            SendPlayerName_ClientRPC(userName, clientNetworkId, RPCTargetFilters.SendToOppositeClient(clientNetworkId));
         }
 
         [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void SendPlayerName_ClientRPC(ulong playerNetworkId, string userName)
+        private void SendPlayerName_ClientRPC(string userName, ulong playerNetworkId, ClientRpcParams rpcParams = default)
         {
-            // Only send to other player
-            if (NetworkManager.LocalClientId == playerNetworkId) return;
+            if (IsHost && RPCTargetFilters.ShouldHostSkip(rpcParams)) return;
 
-            UpdateUserName(playerNetworkId, userName);
+            UpdateUserName_Local(userName, playerNetworkId);
         }
 
-        private void UpdateUserName(ulong playerNetworkId, string name)
+        private void UpdateUserName_Local(string userName, ulong nameTargetNetworkId)
         {
-            if (playerNetworkId == 0)
+            if (nameTargetNetworkId == NetworkManager.LocalClientId)
             {
-                player1.text = name;
+                localNameText.text = userName;
             }
             else
             {
-                player2.text = name;
+                oponnentNameText.text = userName;
             }
         }
     }

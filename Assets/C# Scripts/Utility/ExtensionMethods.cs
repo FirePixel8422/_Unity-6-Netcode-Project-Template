@@ -1,4 +1,5 @@
-﻿using FirePixel.Networking;
+﻿using Fire_Pixel.Networking;
+using Fire_Pixel.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,24 +13,30 @@ public static class ExtensionMethods
 {
     #region Invoke
 
-    public static void Invoke(this MonoBehaviour mb, float delay, Action f)
+    /// <summary>
+    /// Invoke function <paramref name="f"/> after <paramref name="delay"/> seconds. Schedules a coroutine on the target <see cref="MonoBehaviour"/>
+    /// </summary>
+    /// <returns>The scheduled coroutine ref</returns>
+    public static InvokeCallbackReference Invoke(this MonoBehaviour mb, float delay, Action f)
     {
-        mb.StartCoroutine(InvokeRoutine(delay, f));
+        return CallbackScheduler.Invoke(delay, f, mb.GetInstanceID());
     }
-    public static void Invoke<T>(this MonoBehaviour mb, float delay, Action<T> f, T param)
+    /// <summary>
+    /// Stops a previously scheduled Invoke Callback on target (<see cref="MonoBehaviour"/>) and clears its reference.
+    /// Must be called on the same owner (<see cref="MonoBehaviour"/>) that started the coroutine.
+    /// </summary>
+    public static void CancelInvoke(this MonoBehaviour _, ref InvokeCallbackReference callbackRef)
     {
-        mb.StartCoroutine(InvokeRoutine(delay, f, param));
-    }
+        if (callbackRef == null) return;
 
-    private static IEnumerator InvokeRoutine(float delay, Action f)
-    {
-        yield return new WaitForSeconds(delay);
-        f.Invoke();
+        CallbackScheduler.CancelInvoke(ref callbackRef);
     }
-    private static IEnumerator InvokeRoutine<T>(float delay, Action<T> f, T param)
+    /// <summary>
+    /// Stops a previously scheduled Invoke Callback on <see cref="CallbackScheduler"/> and clears its reference.
+    /// </summary>
+    public static void CancelAllInvokes(this MonoBehaviour mb)
     {
-        yield return new WaitForSeconds(delay);
-        f.Invoke(param);
+        CallbackScheduler.CancelAllInvokesInGroup(mb.GetInstanceID());
     }
 
     #endregion
@@ -168,6 +175,79 @@ public static class ExtensionMethods
         FindObjectsSortMode sortMode = sortByInstanceID ? FindObjectsSortMode.InstanceID : FindObjectsSortMode.None;
 
         return UnityEngine.Object.FindObjectsByType<T>(findObjectsInactive, sortMode);
+    }
+
+    #endregion
+
+
+    #region GetComponents Ordered
+
+    public static T[] GetComponentsOrdered<T>(this Component comp) where T : Component
+    {
+        T[] components = comp.GetComponents<T>();
+
+        System.Array.Sort(components, (a, b) =>
+        {
+            return a.GetInstanceID().CompareTo(b.GetInstanceID());
+        });
+
+        return components;
+    }
+
+    public static T[] GetComponentsInChildrenOrdered<T>(this Transform trans, bool includeInactive = false) where T : Component
+    {
+        T[] components = trans.GetComponentsInChildren<T>(includeInactive);
+
+        System.Array.Sort(components, (a, b) =>
+        {
+            string pathA = GetHierarchyPath(a.transform);
+            string pathB = GetHierarchyPath(b.transform);
+            return string.CompareOrdinal(pathA, pathB);
+        });
+
+        return components;
+    }
+
+    public static T[] GetComponentsInParentOrdered<T>(this Transform trans, bool includeInactive = false) where T : Component
+    {
+        T[] components = trans.GetComponentsInParent<T>(includeInactive);
+
+        System.Array.Sort(components, (a, b) =>
+        {
+            string pathA = GetHierarchyPath(a.transform);
+            string pathB = GetHierarchyPath(b.transform);
+            return string.CompareOrdinal(pathA, pathB);
+        });
+
+        return components;
+    }
+
+    public static T[] FindObjectsOfTypeOrdered<T>() where T : Component
+    {
+        T[] objects = UnityEngine.Object.FindObjectsOfType<T>();
+
+        System.Array.Sort(objects, (a, b) =>
+        {
+            string pathA = GetHierarchyPath(a.transform);
+            string pathB = GetHierarchyPath(b.transform);
+            return string.CompareOrdinal(pathA, pathB);
+        });
+
+        return objects;
+    }
+
+    private static string GetHierarchyPath(Transform t)
+    {
+        System.Text.StringBuilder builder = new System.Text.StringBuilder(64);
+
+        while (t != null)
+        {
+            builder.Insert(0, '/');
+            builder.Insert(1, t.name);
+            t = t.parent;
+        }
+
+        return builder.ToString();
     }
 
     #endregion
@@ -408,6 +488,121 @@ public static class ExtensionMethods
     #endregion
 
 
+    #region Array Utility
+
+    /// <summary>
+    /// Selects and returns a random entry of array.
+    /// </summary>
+    public static T SelectRandom<T>(this T[] targetArray)
+    {
+        return targetArray[UnityEngine.Random.Range(0, targetArray.Length)];
+    }
+
+    /// <summary>
+    /// Selects and returns a random array filled with entries of <paramref name="targetArray"/>
+    /// </summary>
+    public static T[] SelectRandomRange<T>(this T[] targetArray, int entryCount, bool forceUniqueEntries = true)
+    {
+        T[] output = new T[entryCount];
+
+        if (forceUniqueEntries)
+        {
+            List<int> numberPot = new List<int>(entryCount);
+            for (int i = 0; i < targetArray.Length; i++)
+            {
+                numberPot.Add(i);
+            }
+
+            int r;
+            for (int i = 0; i < entryCount; i++)
+            {
+                r = UnityEngine.Random.Range(0, numberPot.Count);
+
+                output[i] = targetArray[numberPot[r]];
+
+                numberPot.RemoveAt(r);
+            }
+        }
+        else
+        {
+            int r;
+            for (int i = 0; i < entryCount; i++)
+            {
+                r = UnityEngine.Random.Range(0, entryCount);
+
+                output[i] = targetArray[r];
+            }
+        }
+        return output;
+    }
+
+    /// <summary>
+    /// Modifies a struct element in a list safely by copying, running the modifier, then writing it back.
+    /// </summary>
+    public static void ModifyAt<T>(this List<T> list, int index, ActionRef<T> modifier) where T : struct
+    {
+        T copy = list[index];
+        modifier(ref copy);
+        list[index] = copy;
+    }
+    public delegate void ActionRef<T>(ref T value);
+
+
+    /// <returns>Wheather array is valid and has at least 1 entry</returns>
+    public static bool HasData<T>(this T[] array)
+    {
+        return array != null && array.Length > 0;
+    }
+    /// <returns>Wheather array is invalid or its length is 0</returns>
+    public static bool IsNullOrEmpty<T>(this T[] array)
+    {
+        return array == null || array.Length == 0;
+    }
+    /// <returns>Wheather array is invalid or its length is 0</returns>
+    public static bool IsNotNullOrEmpty<T>(this T[] array)
+    {
+        return array != null && array.Length != 0;
+    }
+    /// <returns>Wheather array is invalid or its length is 0 or it has null at one of its entries</returns>
+    public static bool HasInvalidData<T>(this T[] array)
+    {
+        bool arrayValid = array != null && array.Length > 0;
+        if (arrayValid)
+        {
+            int count = array.Length;
+            for (int i = 0; i < count; i++)
+            {
+                if (array[i] == null)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    /// <returns>Wheather array is valid or its length is more then 0 and it has no null at none of its entries</returns>
+    public static bool HasNoInvalidData<T>(this T[] array)
+    {
+        bool arrayValid = array != null && array.Length > 0;
+        if (arrayValid)
+        {
+            int count = array.Length;
+            for (int i = 0; i < count; i++)
+            {
+                if (array[i] == null)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    #endregion
+
+
+    #region Netcode Utility
+
     /// <summary>
     /// Get PlayerGameId through ClientManager using OwnerClientId.
     /// </summary>
@@ -415,6 +610,15 @@ public static class ExtensionMethods
     {
         return ClientManager.GetClientGameId(networkObj.OwnerClientId);
     }
+    /// <summary>
+    /// Gets <see cref="ServerRpcParams.Receive"/>.SenderClientId and converts it to gameId using <see cref="ClientManager"/> gamdeId system
+    /// </summary>
+    public static int GetSenderClientGameId(this ServerRpcParams receive)
+    {
+        return ClientManager.GetClientGameId(receive.Receive.SenderClientId);
+    }
+
+    #endregion
 
     /// <summary>
     /// Try finding an action by name, returns true if found, false if not. Outputs the found action
@@ -423,23 +627,5 @@ public static class ExtensionMethods
     {
         action = actionAsset.FindAction(actionName);
         return action != null;
-    }
-
-    /// <summary>
-    /// Randomly shuffles the content of the array in place using Fisher–Yates.
-    /// </summary>
-    public static T SelectRandom<T>(this T[] targetArray)
-    {
-        return targetArray[UnityEngine.Random.Range(0, targetArray.Length)];
-    }
-
-    /// <summary>
-    /// Modifies a struct element in a list safely by copying, running the modifier, then writing it back.
-    /// </summary>
-    public static void ModifyAt<T>(this List<T> list, int index, Action<T> modifier) where T : struct
-    {
-        T copy = list[index];
-        modifier(copy);
-        list[index] = copy;
     }
 }

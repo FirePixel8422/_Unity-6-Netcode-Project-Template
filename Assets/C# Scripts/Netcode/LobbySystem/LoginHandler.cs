@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class LoginHandler : MonoBehaviour
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     [System.Serializable]
     [Tooltip("Netcode friendly array to store client data (clientId (also called networkId), gameId (the Xth client this is in the lobby -1), > (SERVER ONLY) > username string and guid (unique player id string for LobbySystem)")]

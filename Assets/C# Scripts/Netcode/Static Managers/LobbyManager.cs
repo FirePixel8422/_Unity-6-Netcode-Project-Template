@@ -8,7 +8,7 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public static class LobbyManager
     {
@@ -19,6 +19,10 @@ namespace FirePixel.Networking
 #pragma warning disable UDR0001
         private static Coroutine heartBeatCo;
 #pragma warning restore UDR0001
+
+#if Enable_Debug_Systems
+        private static bool LogDebugInfo => ClientManager.Instance.LogDebugInfo;
+#endif
 
 
         /// <summary>
@@ -39,15 +43,6 @@ namespace FirePixel.Networking
             await FileManager.SaveInfoAsync(new ValueWrapper<string>(LobbyId), LobbyMaker.REJOINDATA_PATH);
         }
 
-
-        /// <summary>
-        /// MUST be called on server. Deletes Lobby Async
-        /// </summary>
-        public async static Task DeleteLobbyAsync_OnServer()
-        {
-            await LobbyService.Instance.DeleteLobbyAsync(LobbyId);
-        }
-
         /// <summary>
         /// MUST be called on server. Deletes Lobby instantly
         /// </summary>
@@ -60,7 +55,6 @@ namespace FirePixel.Networking
             }
 
             _ = UpdateLobbyDataAsync(LobbyId, LobbyMaker.LOBBY_TERMINATED_STR, "true");
-
             _ = LobbyService.Instance.DeleteLobbyAsync(LobbyId);
         }
 
@@ -104,7 +98,9 @@ namespace FirePixel.Networking
 
                     CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(lobbyId, updateOptions);
 
-                    DebugLogger.Log($"Lobby updated: {key} = {value}");
+#if Enable_Debug_Systems
+                    DebugLogger.Log($"Lobby updated: {key} = {value}", LogDebugInfo);
+#endif
                 }
                 else
                 {

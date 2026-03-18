@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     [Tooltip("Data container for connecting to a server")]
     public struct RelayJoinData

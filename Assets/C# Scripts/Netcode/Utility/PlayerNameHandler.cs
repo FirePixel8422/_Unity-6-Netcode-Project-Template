@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class PlayerNameHandler : MonoBehaviour
     {
@@ -45,7 +45,6 @@ namespace FirePixel.Networking
                 ClientManager.SetLocalUsername(funnyName);
 
                 FileManager.TryDeleteFile(PLAYERNAME_PATH);
-
                 return;
             }
 

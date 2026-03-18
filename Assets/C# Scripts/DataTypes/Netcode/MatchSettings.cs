@@ -1,7 +1,7 @@
 using Unity.Netcode;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     [System.Serializable]
     public struct MatchSettings : INetworkSerializable

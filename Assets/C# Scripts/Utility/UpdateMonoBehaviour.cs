@@ -4,8 +4,8 @@ using Fire_Pixel.Utility;
 
 public class UpdateMonoBehaviour : MonoBehaviour
 {
-    private void OnEnable() => UpdateScheduler.RegisterUpdate(OnUpdate);
-    private void OnDisable() => UpdateScheduler.UnRegisterUpdate(OnUpdate);
+    protected virtual void OnEnable() => CallbackScheduler.RegisterUpdate(OnUpdate);
+    protected virtual void OnDisable() => CallbackScheduler.UnRegisterUpdate(OnUpdate);
 
     protected virtual void OnUpdate()
     {

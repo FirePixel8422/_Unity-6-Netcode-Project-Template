@@ -1,0 +1,164 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5175170958893108009
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8360594051184221859}
+  - component: {fileID: 917007946893999075}
+  - component: {fileID: 4632173753953904272}
+  - component: {fileID: 7267130477029993329}
+  - component: {fileID: 9064776682764377234}
+  - component: {fileID: 1459675821888601271}
+  - component: {fileID: 1842494467557109432}
+  m_Layer: 0
+  m_Name: NET_MatchManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8360594051184221859
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175170958893108009}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &917007946893999075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175170958893108009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3852124708
+  InScenePlacedSourceGlobalObjectIdHash: 4055712283
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &4632173753953904272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175170958893108009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91a1fa07f73e0c042ad708022afa479c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TurnManager
+  ShowTopMostFoldoutHeaderGroup: 1
+  turnTimeLeftText: {fileID: 0}
+  turnTimerActiveColor: {r: 1, g: 1, b: 1, a: 1}
+  turnTimerLowColor: {r: 0.9411765, g: 0.34509805, b: 0.30980393, a: 1}
+--- !u!114 &7267130477029993329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175170958893108009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dcc15c6106c0b44db634567e5b75639, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FirePixel.Networking.MatchManager
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &9064776682764377234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175170958893108009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48798f57ddb781f4eb33a984ec1e577b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatManager
+  ShowTopMostFoldoutHeaderGroup: 1
+  playerStats: []
+  blockInput: {fileID: 3542362157572111605, guid: 6842473d79b50d848a6767cf3412d4c5,
+    type: 3}
+  parryInput: {fileID: 3796307412335060162, guid: 6842473d79b50d848a6767cf3412d4c5,
+    type: 3}
+  qteInput: {fileID: 12184449177061535, guid: 6842473d79b50d848a6767cf3412d4c5, type: 3}
+  onHitShakeSequences:
+    values:
+    - Value:
+      - Strength: 0.25
+        Duration: 1
+    - Value:
+      - Strength: 0.175
+        Duration: 1
+    - Value:
+      - Strength: 0.125
+        Duration: 1
+    - Value:
+      - Strength: 0.05
+        Duration: 1
+  DEBUG_ShakeSequence:
+  - Strength: 1
+    Duration: 0.75
+  - Strength: 0.5
+    Duration: 0.5
+  - Strength: 0.25
+    Duration: 0.2
+--- !u!114 &1459675821888601271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175170958893108009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dacef702faba7a4a80c35a661a56f30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fire_Pixel.Networking.PlayerNameDisplayer
+  ShowTopMostFoldoutHeaderGroup: 1
+  localNameText: {fileID: 0}
+  oponnentNameText: {fileID: 0}
+--- !u!114 &1842494467557109432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175170958893108009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7106d8d319e269f499eeb73dd7ffdfe8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fire_Pixel.Networking.PingChecker
+  ShowTopMostFoldoutHeaderGroup: 1
+  pingtext: {fileID: 0}
+  updateInterval: 0.5
+  halveRTT: 1

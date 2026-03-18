@@ -13,7 +13,7 @@ using UnityEngine.UI;
 
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     /// <summary>
     /// MB class responsible for creating and joining lobbies
@@ -28,7 +28,7 @@ namespace FirePixel.Networking
 
 
         [Header("Scene to load when joining or creating a lobby\nLeave empty for no scene load")]
-        [SerializeField] private string nextSceneName;
+        [SerializeField] private string nextSceneName = "Pre-MainGame";
         [SerializeField] private GameObject invisibleScreenCover;
         [SerializeField] private GameObject rejoinMenu;
 
@@ -76,6 +76,7 @@ namespace FirePixel.Networking
 
                     bool lobbyAlive =
                         lobby != null &&
+                        lobby.Data[LOBBY_TERMINATED_STR].Value == "false" &&
                         DateTime.UtcNow.Ticks - long.Parse(lobby.Data[LOBBY_LAST_HEARTBEAT_STR].Value) < TimeSpan.FromSeconds(30).Ticks;
 
                     if (lobbyAlive)
@@ -147,7 +148,7 @@ namespace FirePixel.Networking
         public async Task<bool> CreateLobbyAsync()
         {
             invisibleScreenCover?.SetActive(true);
-            int maxPlayers = GlobalGameData.MaxPlayers;
+            int maxPlayers = GlobalGameData.MAX_PLAYERS;
 
             try
             {

@@ -4,7 +4,7 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class LobbyUIMananager : MonoBehaviour
     {
