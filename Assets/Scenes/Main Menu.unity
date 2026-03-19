@@ -200,7 +200,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3088868075374821422, guid: aa2da3930e5c488489dd963262efde6f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 42633450}
   m_SourcePrefab: {fileID: 100100000, guid: aa2da3930e5c488489dd963262efde6f, type: 3}
 --- !u!114 &42633448 stripped
 MonoBehaviour:
@@ -208,12 +212,31 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 42633447}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 42633449}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c7332ffd667763c4ab6a74ead269ca01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &42633449 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3088868075374821422, guid: aa2da3930e5c488489dd963262efde6f,
+    type: 3}
+  m_PrefabInstance: {fileID: 42633447}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &42633450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 42633449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fee467f62092cc84ba26178c118f6e56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkTickEnabler
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &1526204018
 GameObject:
   m_ObjectHideFlags: 0

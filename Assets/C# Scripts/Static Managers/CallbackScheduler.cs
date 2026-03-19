@@ -28,6 +28,9 @@ namespace Fire_Pixel.Utility
         private static readonly List<DelayedCallback> delayedCallbacks = new List<DelayedCallback>();
         private static readonly List<InvokeCallbackReference> callbackReferences = new List<InvokeCallbackReference>();
 
+        private static bool networkTickActive;
+        private static bool quitting;
+
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
@@ -39,7 +42,10 @@ namespace Fire_Pixel.Utility
         }
         public static void EnableNetworkTickEvents()
         {
+            if (networkTickActive) return;
+
             CallbackRunnerInstance.Instance.EnableNetworkTickEvent();
+            networkTickActive = true;
         }
 
 
@@ -268,6 +274,7 @@ namespace Fire_Pixel.Utility
         {
             public static CallbackRunnerInstance Instance { get; set; }
 
+
             public void Init()
             {
                 Instance = this;
@@ -289,6 +296,14 @@ namespace Fire_Pixel.Utility
 
                 while (true)
                 {
+                    if (quitting)
+                    {
+                        LateApplicationQuit?.Invoke();
+                        LateApplicationQuit = null;
+                        StopAllCoroutines();
+                        yield break;
+                    }
+
                     // Update
                     Update?.Invoke();
 
@@ -327,26 +342,22 @@ namespace Fire_Pixel.Utility
 
             private void OnApplicationQuit()
             {
-                LateUpdate += () =>
-                {
-                    if (LateApplicationQuit != null)
-                    {
-                        LateApplicationQuit.Invoke();
-                        LateApplicationQuit = null;
-                        StopAllCoroutines();
-                    }
-                };
+                quitting = true;
             }
             private void OnDestroy()
             {
+                if (NetworkManager.Singleton != null)
+                {
+                    NetworkManager.Singleton.NetworkTickSystem.Tick -= InvokeNetworkTick;
+                }
+                networkTickActive = false;
+
                 Update = null;
                 LateUpdate = null;
                 FixedUpdate = null;
 
                 LateDestroy = null;
                 LateApplicationQuit = null;
-
-                StopAllCoroutines();
             }
         }
     }

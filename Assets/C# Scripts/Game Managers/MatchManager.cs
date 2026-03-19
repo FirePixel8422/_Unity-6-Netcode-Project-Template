@@ -15,12 +15,6 @@ namespace Fire_Pixel.Networking
         private int playerReadyCount;
 
 
-
-        public override void OnNetworkSpawn()
-        {
-            base.OnNetworkSpawn();
-            CallbackScheduler.EnableNetworkTickEvents();
-        }
         protected override void OnNetworkSystemsSetupPostStart()
         {
             TurnManager.TurnChanged += OnTurnChanged;
