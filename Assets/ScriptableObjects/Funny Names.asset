@@ -9,20 +9,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4815c66e18525204c8795f45a1909bf7, type: 3}
+  m_Script: {fileID: 11500000, guid: 044a1841e3ef6ef4bbdd82d2d6550a6c, type: 3}
   m_Name: Funny Names
   m_EditorClassIdentifier: Assembly-CSharp::RandomPlayerNamesSO
   funnyNames:
+  - GrandmaPuncher
   - John Doe
   - Willow Wilson
   - BijnaMichael
+  - Diddy Dodat
   - Yi-Long-Ma
+  - Bawl-Ling
+  - Wei Tu Dum
+  - Hu Lang
   - DickSniffer
   - CraniumSnuiver
   - Moe-Lester
   - HonkiePlonkie
   - Craig Skinflute
   - Admiral Aids
-  - Diddy Dodad
-  - Tyrone Trickshot
-  - Heroine Henry
+  - Mike Coxlong
+  - Seymore Butts
+  - Ben Dover
+  - Neil Down
+  - Wayne Kerr
+  - ToeNailBandit
+  - Master-Baiter

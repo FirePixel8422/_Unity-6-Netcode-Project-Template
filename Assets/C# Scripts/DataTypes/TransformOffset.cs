@@ -7,7 +7,7 @@ public struct TransformOffset
     public Vector3 position;
     public Vector3 eulerRotation;
     public Vector3 scale;
-    public Quaternion Rotation => Quaternion.Euler(eulerRotation);
+    public readonly Quaternion Rotation => Quaternion.Euler(eulerRotation);
 
 
     public TransformOffset(Vector3 position, Vector3 rotation, Vector3 scale)

@@ -94,7 +94,6 @@ namespace Fire_Pixel.Networking
 
             if (turnTimeLeft <= 0)
             {
-                SkillUIManager.UpdateSkillUIActiveState(false);
                 NextTurn_ServerRPC();
                 EndTurnTimer();
             }

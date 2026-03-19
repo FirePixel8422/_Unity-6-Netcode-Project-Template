@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: TBD
-  productName: The Ultimate
+  productName: TBD Netcode
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -85,7 +85,7 @@ PlayerSettings:
   androidApplicationEntry: 1
   defaultIsNativeResolution: 1
   macRetinaSupport: 1
-  runInBackground: 0
+  runInBackground: 1
   muteOtherAudioSources: 0
   Prepare IOS For Recording: 0
   Force IOS Speakers When Recording: 0
@@ -837,7 +837,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Standalone: Enable_Debug_Logging
+    Standalone: Enable_Debug_Systems
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
@@ -951,10 +951,10 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: a8a4b414-fa8c-4c5d-857c-7fe522d4868b
+  cloudProjectId: 3ed80038-2fc7-4755-8efe-77997fa59f7e
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Red Strike
+  projectName: TBD Netcode
   organizationId: bmtminecraft
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0

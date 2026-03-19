@@ -118,4 +118,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   networkPrefabsList:
-  - {fileID: 11400000, guid: 82cfcd4dd5593d94ea74248eb315b12f, type: 2}
+  - {fileID: 11400000, guid: cfff7ea83752b2246a452690758c29fc, type: 2}
