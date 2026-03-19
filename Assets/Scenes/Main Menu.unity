@@ -573,76 +573,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 731029970132351768, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 1362722517942800056, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
     - target: {fileID: 1807479474743173074, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 42633448}
-    - target: {fileID: 2329524942780270622, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 2329524942780270622, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 2164260863
-      objectReference: {fileID: 0}
-    - target: {fileID: 3389570633116112752, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 3389570633116112752, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 2164260863
-      objectReference: {fileID: 0}
-    - target: {fileID: 4578452979890165462, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 4966312958429717511, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
     - target: {fileID: 5106195333029019642, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Target
       value: 
       objectReference: {fileID: 42633448}
-    - target: {fileID: 5406895752791454250, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 5455581112969584864, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 5455581112969584864, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 2164260863
-      objectReference: {fileID: 0}
-    - target: {fileID: 5855338625228320781, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
     - target: {fileID: 6099303365117602034, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
         type: 3}
       propertyPath: m_Pivot.x
@@ -747,21 +687,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Main Menu Canvas (Parent)
-      objectReference: {fileID: 0}
-    - target: {fileID: 7612808557531825527, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 8589699223227114275, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 8589699223227114275, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
-        type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 2164260863
       objectReference: {fileID: 0}
     - target: {fileID: 8981997548401571613, guid: 1767c25e0f45e0b4c813fd6d382b2c53,
         type: 3}

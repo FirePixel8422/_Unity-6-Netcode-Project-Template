@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4632173753953904272}
   - component: {fileID: 1459675821888601271}
   - component: {fileID: 1842494467557109432}
+  - component: {fileID: 3860541492353823203}
   m_Layer: 0
   m_Name: NET_MatchManager
   m_TagString: Untagged
@@ -107,3 +108,16 @@ MonoBehaviour:
   pingtext: {fileID: 0}
   updateInterval: 0.5
   halveRTT: 1
+--- !u!114 &3860541492353823203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175170958893108009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86559eca88a436f40909279113fe5b22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fire_Pixel.Networking.MatchManager
+  ShowTopMostFoldoutHeaderGroup: 1
