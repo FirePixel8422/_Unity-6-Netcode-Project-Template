@@ -224,8 +224,8 @@ public static class ExtensionMethods
 
     public static T[] FindObjectsOfTypeOrdered<T>() where T : Component
     {
-        T[] objects = UnityEngine.Object.FindObjectsOfType<T>();
-
+        T[] objects = UnityEngine.Object.FindObjectsByType<T>(FindObjectsSortMode.None);
+        
         System.Array.Sort(objects, (a, b) =>
         {
             string pathA = GetHierarchyPath(a.transform);
@@ -471,7 +471,7 @@ public static class ExtensionMethods
     /// </summary>
     public static int AddSmart(this ref int value, int toAdd, int length)
     {
-        DebugLogger.Throw("AddSmart called with length 0", length <= 0);
+        DebugLogger.LogAssertion("AddSmart called with length 0", length <= 0);
 
         value += toAdd;
         while (value >= length)

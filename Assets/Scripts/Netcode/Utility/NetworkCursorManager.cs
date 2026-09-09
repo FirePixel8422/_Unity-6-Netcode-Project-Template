@@ -47,9 +47,8 @@ public class NetworkCursorManager : SmartNetworkBehaviour
 
     private void OnValidate()
     {
-        if (cursorColors.Length != GlobalGameData.MAX_PLAYERS)
-        {
-            cursorColors = new Color[GlobalGameData.MAX_PLAYERS];
-        }
+        if (cursorColors == null || cursorColors.Length == GlobalGameData.MAX_PLAYERS) return;
+
+        cursorColors = new Color[GlobalGameData.MAX_PLAYERS];
     }
 }

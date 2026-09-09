@@ -2,11 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
 
 namespace Fire_Pixel.Utility
 {
+#pragma warning disable UDR0002
+#pragma warning disable UDR0004
     /// <summary>
     /// Uitlity class to have an optimized easy access to varying callbacks by using an Action based callback system
     /// Handles callbacks and batch them for every script by an event based register system
@@ -52,15 +55,24 @@ namespace Fire_Pixel.Utility
 
             delayedCallbacks?.Clear();
             callbackReferences?.Clear();
+
+            networkTickActive = false;
             quitting = false;
         }
 
-        public static void EnableNetworkTickEvents()
+        public static void EnableNetworkTickEvent()
         {
             if (networkTickActive) return;
 
-            CallbackRunnerInstance.Instance.EnableNetworkTickEvent();
+            NetworkManager.Singleton.NetworkTickSystem.Tick += NetworkTick;
             networkTickActive = true;
+        }
+        public static void DisableNetworkTickEvent()
+        {
+            if (!networkTickActive) return;
+
+            NetworkManager.Singleton.NetworkTickSystem.Tick -= NetworkTick;
+            networkTickActive = false;
         }
 
 
@@ -69,7 +81,7 @@ namespace Fire_Pixel.Utility
         /// <summary>
         /// Register a method to call every frame like Update()
         /// </summary>
-        public static void RegisterCallback(CallbackType type, Action action)
+        public static void RegisterCallback(Action action, CallbackType type)
         {
             switch (type)
             {
@@ -85,8 +97,8 @@ namespace Fire_Pixel.Utility
                     FixedUpdate += action;
                     return;
 
-                case CallbackType.Destroy:
-                    LateDestroy += action;
+                case CallbackType.NetworkTick:
+                    NetworkTick += action;
                     return;
 
                 case CallbackType.LateDestroy:
@@ -110,7 +122,7 @@ namespace Fire_Pixel.Utility
         /// <summary>
         /// Unregister a registered method for callback "<paramref name="type"/>"
         /// </summary>
-        public static void UnRegisterCallback(CallbackType type, Action action)
+        public static void UnRegisterCallback(Action action, CallbackType type)
         {
             switch (type)
             {
@@ -126,8 +138,8 @@ namespace Fire_Pixel.Utility
                     FixedUpdate -= action;
                     return;
 
-                case CallbackType.Destroy:
-                    LateDestroy -= action;
+                case CallbackType.NetworkTick:
+                    NetworkTick -= action;
                     return;
 
                 case CallbackType.LateDestroy:
@@ -151,15 +163,15 @@ namespace Fire_Pixel.Utility
         /// <summary>
         /// Register or Unregister a method for callback "<paramref name="type"/>" based on bool <paramref name="doRegister"/>
         /// </summary>
-        public static void ManageCallback(CallbackType type, Action action, bool doRegister)
+        public static void ManageCallback(Action action, CallbackType type, bool doRegister)
         {
             if (doRegister)
             {
-                RegisterCallback(type, action);
+                RegisterCallback(action, type);
             }
             else
             {
-                UnRegisterCallback(type, action);
+                UnRegisterCallback(action, type);
             }
         }
 
@@ -168,7 +180,7 @@ namespace Fire_Pixel.Utility
 
         #region Delayed Callback System
 
-        public static InvokeCallbackReference InvokeDelayed(float delay, Action callback, int groupId = 0)
+        public static InvokeCallbackReference Invoke(float delay, Action callback, int groupId = 0)
         {
             delayedCallbacks.Add(new DelayedCallback(callback, Time.time + delay, groupId));
 
@@ -176,6 +188,11 @@ namespace Fire_Pixel.Utility
             callbackReferences.Add(callbackRef);
 
             return callbackRef;
+        }
+        public static void InvokeAndForget(float delay, Action callback, int groupId = 0)
+        {
+            delayedCallbacks.Add(new DelayedCallback(callback, Time.time + delay, groupId));
+            callbackReferences.Add(null);
         }
         /// <summary>
         /// Stops a previously scheduled Invoke Callback by ref and clears its reference.
@@ -212,7 +229,10 @@ namespace Fire_Pixel.Utility
             if (toRemoveId != delayedCallbacks.Count - 1)
             {
                 // Update the reference of the moved callback
-                callbackReferences[^1].SetId(toRemoveId);
+                if (callbackReferences[^1] != null)
+                {
+                    callbackReferences[^1].SetId(toRemoveId);
+                }
             }
             // Remove the callback and its reference
             callbackReferences.RemoveAtSwapBack(toRemoveId);
@@ -227,7 +247,6 @@ namespace Fire_Pixel.Utility
         /// </summary>
         private class CallbackRunnerInstance : MonoBehaviour
         {
-            public CallbackRunnerInstance Instance;
             public void Init()
             {
                 StartCoroutine(UpdateLoop());
@@ -297,6 +316,8 @@ namespace Fire_Pixel.Utility
             }
         }
     }
+#pragma warning restore UDR0002
+#pragma warning restore UDR0004
 
     public static class CallbackSchedulerExtensionMethods
     {
@@ -306,8 +327,17 @@ namespace Fire_Pixel.Utility
         /// <returns>The scheduled coroutine ref</returns>
         public static InvokeCallbackReference Invoke(this MonoBehaviour mb, float delay, Action f)
         {
-            return CallbackScheduler.InvokeDelayed(delay, f, mb.GetInstanceID());
+            return CallbackScheduler.Invoke(delay, f, mb.GetInstanceID());
         }
+        /// <summary>
+        /// Invoke function <paramref name="f"/> after <paramref name="delay"/> seconds. Schedules a coroutine on the target <see cref="MonoBehaviour"/>
+        /// No callback reference is created. The invoke is only cancelable with the groupId.
+        /// </summary>
+        public static void InvokeAndForget(this MonoBehaviour mb, float delay, Action f)
+        {
+            CallbackScheduler.InvokeAndForget(delay, f, mb.GetInstanceID());
+        }
+
         /// <summary>
         /// Stops a previously scheduled Invoke Callback on target (<see cref="MonoBehaviour"/>) and clears its reference.
         /// Must be called on the same owner (<see cref="MonoBehaviour"/>) that started the coroutine.
@@ -358,7 +388,7 @@ namespace Fire_Pixel.Utility
         Update,
         LateUpdate,
         FixedUpdate,
-        Destroy,
+        NetworkTick,
         LateDestroy,
         ApplicationQuit,
         LateApplicationQuit,

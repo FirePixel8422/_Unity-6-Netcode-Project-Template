@@ -48,7 +48,7 @@ namespace Fire_Pixel.Networking
             SwapToNextTurn_ClientRPC(-1, clientOnTurnId);
         }
 
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
+        [Rpc(SendTo.Server, Delivery = RpcDelivery.Reliable)]
         public void NextTurn_ServerRPC()
         {
             int prevClientOnTurnId = clientOnTurnId;
@@ -56,7 +56,7 @@ namespace Fire_Pixel.Networking
 
             SwapToNextTurn_ClientRPC(prevClientOnTurnId, clientOnTurnId);
         }
-        [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
+        [Rpc(SendTo.ClientsAndHost, Delivery = RpcDelivery.Reliable)]
         private void SwapToNextTurn_ClientRPC(int prevClientOnTurnId, int nextClientOnTurnId)
         {
             clientOnTurnId = nextClientOnTurnId;
@@ -68,7 +68,7 @@ namespace Fire_Pixel.Networking
             if (IsMyTurn)
             {
                 turnTimeLeft = TIME_PER_TURN;
-                CallbackScheduler.RegisterUpdate(OnUpdateTimer);
+                CallbackScheduler.RegisterCallback(OnUpdateTimer, CallbackType.Update);
 
                 TurnStarted?.Invoke();
             }
@@ -81,7 +81,7 @@ namespace Fire_Pixel.Networking
         public void EndTurnTimer()
         {
             turnTimeLeftText.text = "-";
-            CallbackScheduler.UnRegisterUpdate(OnUpdateTimer);
+            CallbackScheduler.RegisterCallback(OnUpdateTimer, CallbackType.Update);
         }
         private void OnUpdateTimer()
         {
