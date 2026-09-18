@@ -19,27 +19,25 @@ namespace Fire_Pixel.Networking
         {
             string userName = ClientManager.LocalUserName;
 
-            UpdateUserName_Local(userName, NetworkManager.LocalClientId);
-            SendPlayerName_ServerRPC(userName);
+            UpdateUserName(userName, NetworkManager.LocalClientId);
+            SendPlayerNameRpc(userName);
         }
 
 
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void SendPlayerName_ServerRPC(string userName, ServerRpcParams rpcParams = default)
+        [Rpc(SendTo.Server)]
+        private void SendPlayerNameRpc(string userName, RpcParams rpcParams = default)
         {
             ulong clientNetworkId = rpcParams.Receive.SenderClientId;
-            SendPlayerName_ClientRPC(userName, clientNetworkId, RPCTargetFilters.SendToOppositeClient(clientNetworkId));
+            SendPlayerNameRpc(userName, clientNetworkId, RpcTarget.Single(clientNetworkId, RpcTargetUse.Temp));
         }
 
-        [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void SendPlayerName_ClientRPC(string userName, ulong playerNetworkId, ClientRpcParams rpcParams = default)
+        [Rpc(SendTo.SpecifiedInParams)]
+        private void SendPlayerNameRpc(string userName, ulong playerNetworkId, RpcParams rpcParams = default)
         {
-            if (IsHost && RPCTargetFilters.ShouldHostSkip(rpcParams)) return;
-
-            UpdateUserName_Local(userName, playerNetworkId);
+            UpdateUserName(userName, playerNetworkId);
         }
 
-        private void UpdateUserName_Local(string userName, ulong nameTargetNetworkId)
+        private void UpdateUserName(string userName, ulong nameTargetNetworkId)
         {
             if (nameTargetNetworkId == NetworkManager.LocalClientId)
             {

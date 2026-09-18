@@ -6,6 +6,6 @@ public class QuitMainGame : MonoBehaviour
 {
     public void QuitToMainMenu()
     {
-        ClientManager.Instance.ShutDownNetwork_ServerRPC();
+        ClientManager.Instance.ShutDownNetworkRpc();
     }
 }

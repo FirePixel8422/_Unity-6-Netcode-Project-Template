@@ -48,15 +48,15 @@ namespace Fire_Pixel.Networking
             SwapToNextTurn_ClientRPC(-1, clientOnTurnId);
         }
 
-        [Rpc(SendTo.Server, Delivery = RpcDelivery.Reliable)]
-        public void NextTurn_ServerRPC()
+        [Rpc(SendTo.Server)]
+        public void NextTurnRpc()
         {
             int prevClientOnTurnId = clientOnTurnId;
             clientOnTurnId.IncrementSmart(GlobalGameData.MAX_PLAYERS);
 
             SwapToNextTurn_ClientRPC(prevClientOnTurnId, clientOnTurnId);
         }
-        [Rpc(SendTo.ClientsAndHost, Delivery = RpcDelivery.Reliable)]
+        [Rpc(SendTo.ClientsAndHost)]
         private void SwapToNextTurn_ClientRPC(int prevClientOnTurnId, int nextClientOnTurnId)
         {
             clientOnTurnId = nextClientOnTurnId;
@@ -94,7 +94,7 @@ namespace Fire_Pixel.Networking
 
             if (turnTimeLeft <= 0)
             {
-                NextTurn_ServerRPC();
+                NextTurnRpc();
                 EndTurnTimer();
             }
         }

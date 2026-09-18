@@ -17,12 +17,12 @@ namespace Fire_Pixel.Networking
         protected override void OnNetworkSystemsSetupPostStart()
         {
             TurnManager.TurnChanged += OnTurnChanged;
-            MarkPlayerReady_ServerRPC();
+            MarkPlayerReadyRpc();
         }
 
         [InspectorButton("Ready")]
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        public void MarkPlayerReady_ServerRPC()
+        [Rpc(SendTo.Server)]
+        public void MarkPlayerReadyRpc()
         {
             playerReadyCount += 1;
             if (playerReadyCount == GlobalGameData.MAX_PLAYERS)

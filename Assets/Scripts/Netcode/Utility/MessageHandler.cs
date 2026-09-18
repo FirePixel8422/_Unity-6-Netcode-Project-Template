@@ -70,7 +70,7 @@ namespace Fire_Pixel.Networking
         {
             if (IsNetworkSystemInitilized == false || active == false || ctx.performed == false || string.IsNullOrEmpty(inputField.text)) return;
 
-            SendTextGlobal_ServerRPC(LocalClientGameId, LocalUserName, inputField.text);
+            SendTextGlobalRpc(LocalClientGameId, LocalUserName, inputField.text);
 
             inputField.ActivateInputField();
             inputField.text = "";
@@ -85,29 +85,15 @@ namespace Fire_Pixel.Networking
             StartCoroutine(AddTextToChatBox(LocalClientGameId, LocalUserName, message));
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        public void SendTextGlobal_ServerRPC(int clientGameId, string senderName, string text)
-        {
-            SendTextGlobal_ClientRPC(clientGameId, senderName, text);
-        }
-        [ClientRpc(RequireOwnership = false)]
-        private void SendTextGlobal_ClientRPC(int clientGameId, string senderName, string text)
+        [Rpc(SendTo.ClientsAndHost)]
+        public void SendTextGlobalRpc(int clientGameId, string senderName, string text)
         {
             StartCoroutine(AddTextToChatBox(clientGameId, senderName, text));
         }
 
-
-        [ServerRpc(RequireOwnership = false)]
-        public void SendTextToClient_ServerRPC(int clientGameId, string senderName, string message)
+        [Rpc(SendTo.SpecifiedInParams)]
+        public void SendTextToRpc(int clientGameId, string senderName, string message, RpcParams rpcParams = default)
         {
-            SendTextToClient_ClientRPC(clientGameId, senderName, message);
-        }
-        [ClientRpc(RequireOwnership = false)]
-        private void SendTextToClient_ClientRPC(int clientGameId, string senderName, string message)
-        {
-            // Send to only "toClientId"
-            if (LocalClientGameId != clientGameId) return;
-
             StartCoroutine(AddTextToChatBox(clientGameId, senderName, message));
         }
 

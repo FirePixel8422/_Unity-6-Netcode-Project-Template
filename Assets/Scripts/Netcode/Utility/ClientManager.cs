@@ -50,35 +50,30 @@ namespace Fire_Pixel.Networking
 #endif
             Instance.playerIdDataArray.Value = newValue;
         }
-
-
+        
         private void SendPlayerIdDataArrayChange_OnServer(PlayerIdDataArray newValue)
         {
-            ReceivePlayerIdDataArray_ClientRPC(newValue, RPCTargetFilters.SendToAllButHost());
+            ReceivePlayerIdDataArrayRpc(newValue, RpcTarget.Not(0, RpcTargetUse.Temp));
         }
 
-        [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void ReceivePlayerIdDataArray_ClientRPC(PlayerIdDataArray newValue, ClientRpcParams rpcParams = default)
+        [Rpc(SendTo.SpecifiedInParams)]
+        private void ReceivePlayerIdDataArrayRpc(PlayerIdDataArray newValue, RpcParams rpcParams)
         {
-            if (IsHost && RPCTargetFilters.ShouldHostSkip(rpcParams)) return;
-
             playerIdDataArray.Value = newValue;
         }
 
 
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void RequestPlayerIdDataArray_ServerRPC(ServerRpcParams rpcParams = default)
+        [Rpc(SendTo.Server)]
+        private void RequestPlayerIdDataArrayRpc(RpcParams rpcParams = default)
         {
             ulong senderClientNetworkId = rpcParams.Receive.SenderClientId;
 
-            ReceiveSilentPlayerIdDataArray_ClientRPC(playerIdDataArray.Value, RPCTargetFilters.SendToTargetClient(senderClientNetworkId));
+            ReceiveSilentPlayerIdDataArrayRpc(playerIdDataArray.Value, RpcTarget.Single(senderClientNetworkId, RpcTargetUse.Temp));
         }
 
-        [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void ReceiveSilentPlayerIdDataArray_ClientRPC(PlayerIdDataArray newValue, ClientRpcParams rpcParams = default)
+        [Rpc(SendTo.SpecifiedInParams)]
+        private void ReceiveSilentPlayerIdDataArrayRpc(PlayerIdDataArray newValue, RpcParams rpcParams = default)
         {
-            if (IsHost && RPCTargetFilters.ShouldHostSkip(rpcParams)) return;
-
             playerIdDataArray.SilentValue = newValue;
         }
 
@@ -143,16 +138,14 @@ namespace Fire_Pixel.Networking
 
         #region Send/Recieve Username and GUID and set that data in PlayerIdDataArray
 
-        [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void RequestUsernameAndGUID_ClientRPC(int fromPlayerGameId, ClientRpcParams rpcParams = default)
+        [Rpc(SendTo.SpecifiedInParams)]
+        private void RequestUsernameAndGUIDRpc(int fromPlayerGameId, RpcParams rpcParams = default)
         {
-            if (IsHost && RPCTargetFilters.ShouldHostSkip(rpcParams)) return;
-
-            SendUsernameAndGUID_ServerRPC(fromPlayerGameId, LocalUserName, LocalPlayerGUID);
+            SendUsernameAndGUIDRpc(fromPlayerGameId, LocalUserName, LocalPlayerGUID);
         }
 
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void SendUsernameAndGUID_ServerRPC(int fromPlayerGameId, string username, string guid)
+        [Rpc(SendTo.Server)]
+        private void SendUsernameAndGUIDRpc(int fromPlayerGameId, string username, string guid)
         {
             PlayerIdDataArray updatedDataArray = playerIdDataArray.Value;
             updatedDataArray.SetUserNameAndGUID(fromPlayerGameId, username, guid);
@@ -204,7 +197,7 @@ namespace Fire_Pixel.Networking
             else
             {
                 // Catches up late joining clients with newest value
-                RequestPlayerIdDataArray_ServerRPC();
+                RequestPlayerIdDataArrayRpc();
 
                 // On value changed event of playerIdDataArray
                 playerIdDataArray.OnValueChanged += (PlayerIdDataArray newValue) =>
@@ -236,7 +229,7 @@ namespace Fire_Pixel.Networking
             updatedDataArray.AddPlayer(clientNetworkId);
             playerIdDataArray.Value = updatedDataArray;
 
-            RequestUsernameAndGUID_ClientRPC(GetClientGameId(clientNetworkId), RPCTargetFilters.SendToTargetClient(clientNetworkId));
+            RequestUsernameAndGUIDRpc(GetClientGameId(clientNetworkId), RpcTarget.Single(clientNetworkId, RpcTargetUse.Temp));
 
             OnClientConnectedCallback?.Invoke(new ClientSessionContext()
             {
@@ -322,14 +315,14 @@ namespace Fire_Pixel.Networking
 
         #region Kick and Shutdown Methods
 
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        public void KickTargetClient_ServerRPC(ulong clientNetworkId)
+        [Rpc(SendTo.Server)]
+        public void KickTargetRpc(ulong clientNetworkId)
         {
             NetworkManager.DisconnectClient(clientNetworkId);
         }
 
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        public void ShutDownNetwork_ServerRPC()
+        [Rpc(SendTo.Server)]
+        public void ShutDownNetworkRpc()
         {
             if (IsServer == false) return;
 

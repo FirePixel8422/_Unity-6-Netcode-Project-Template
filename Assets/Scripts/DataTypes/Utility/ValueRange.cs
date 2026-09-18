@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 
 
@@ -146,6 +147,78 @@ public struct ULongRange
 }
 
 /// <summary>
+/// A lightweight range that holds a half Min and half Max.
+/// </summary>
+[System.Serializable]
+public struct HalfRange
+{
+    public half Min;
+    public half Max;
+
+    public HalfRange(half min, half max)
+    {
+        Min = min;
+        Max = max;
+    }
+
+    public readonly half Random() => new half(EzRandom.Range((float)Min, (float)Max));
+}
+
+/// <summary>
+/// A lightweight range that holds a half2 Min and half2 Max.
+/// </summary>
+[System.Serializable]
+public struct Half2Range
+{
+    public half2 Min;
+    public half2 Max;
+
+    public Half2Range(half2 min, half2 max)
+    {
+        Min = min;
+        Max = max;
+    }
+
+    public readonly half2 Random() => new half2(EzRandom.Range((float2)Min, (float2)Max));
+}
+
+/// <summary>
+/// A lightweight range that holds a half3 Min and half3 Max.
+/// </summary>
+[System.Serializable]
+public struct Half3Range
+{
+    public half3 Min;
+    public half3 Max;
+
+    public Half3Range(half3 min, half3 max)
+    {
+        Min = min;
+        Max = max;
+    }
+
+    public readonly half3 Random() => new half3(EzRandom.Range((float3)Min, (float3)Max));
+}
+
+/// <summary>
+/// A lightweight range that holds a half4 Min and half4 Max.
+/// </summary>
+[System.Serializable]
+public struct Half4Range
+{
+    public half4 Min;
+    public half4 Max;
+
+    public Half4Range(half4 min, half4 max)
+    {
+        Min = min;
+        Max = max;
+    }
+
+    public readonly half4 Random() => new half4(EzRandom.Range((float4)Min, (float4)Max));
+}
+
+/// <summary>
 /// A lightweight range that holds a float Min and float Max.
 /// </summary>
 [System.Serializable]
@@ -161,6 +234,60 @@ public struct FloatRange
     }
 
     public readonly float Random() => EzRandom.Range(Min, Max);
+}
+
+/// <summary>
+/// A lightweight range that holds a float2 Min and float2 Max.
+/// </summary>
+[System.Serializable]
+public struct Float2Range
+{
+    public float2 Min;
+    public float2 Max;
+
+    public Float2Range(float2 min, float2 max)
+    {
+        Min = min;
+        Max = max;
+    }
+
+    public readonly float2 Random() => EzRandom.Range(Min, Max);
+}
+
+/// <summary>
+/// A lightweight range that holds a float3 Min and float3 Max.
+/// </summary>
+[System.Serializable]
+public struct Float3Range
+{
+    public float3 Min;
+    public float3 Max;
+
+    public Float3Range(float3 min, float3 max)
+    {
+        Min = min;
+        Max = max;
+    }
+
+    public readonly float3 Random() => EzRandom.Range(Min, Max);
+}
+
+/// <summary>
+/// A lightweight range that holds a float4 Min and float4 Max.
+/// </summary>
+[System.Serializable]
+public struct Float4Range
+{
+    public float4 Min;
+    public float4 Max;
+
+    public Float4Range(float4 min, float4 max)
+    {
+        Min = min;
+        Max = max;
+    }
+
+    public readonly float4 Random() => EzRandom.Range(Min, Max);
 }
 
 /// <summary>

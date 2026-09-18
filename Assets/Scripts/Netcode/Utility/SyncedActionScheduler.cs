@@ -20,13 +20,8 @@ namespace Fire_Pixel.Networking
             Instance.syncedActions.Add(action);
         }
 
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        public void UnRegisterSyncedAction_ServerRPC(int actionId)
-        {
-            UnRegisterSyncedAction_ClientRPC(actionId);
-        }
-        [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void UnRegisterSyncedAction_ClientRPC(int actionId)
+        [Rpc(SendTo.ClientsAndHost)]
+        public void UnRegisterSyncedActionRpc(int actionId)
         {
             int lastIndex = syncedActions.Count - 1;
             if (actionId < lastIndex)
@@ -38,17 +33,18 @@ namespace Fire_Pixel.Networking
         }
 
 
-        [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        public void ScheduleSyncedAction_ServerRPC(int actionId, double serverTimeOnSent, float delaySeconds)
+        [Rpc(SendTo.Server)]
+        public void ScheduleSyncedActionRpc(int actionId, double serverTimeOnSent, float delaySeconds)
         {
             double serverTime = NetworkManager.Singleton.ServerTime.Time;
             double lagTime = serverTime - serverTimeOnSent;
             double timeStamp = serverTime + delaySeconds - lagTime;
 
-            ScheduleSyncedAction_ClientRPC(actionId, timeStamp);
+            ScheduleSyncedActionRpc(actionId, timeStamp);
         }
-        [ClientRpc(RequireOwnership = false, Delivery = RpcDelivery.Reliable)]
-        private void ScheduleSyncedAction_ClientRPC(int actionId, double timeStamp)
+
+        [Rpc(SendTo.ClientsAndHost)]
+        private void ScheduleSyncedActionRpc(int actionId, double timeStamp)
         {
             syncedActions[actionId].ScheduleLocal(timeStamp);
         }

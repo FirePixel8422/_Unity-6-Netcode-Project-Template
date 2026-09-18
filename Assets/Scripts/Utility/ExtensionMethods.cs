@@ -613,7 +613,7 @@ public static class ExtensionMethods
     /// <summary>
     /// Gets <see cref="ServerRpcParams.Receive"/>.SenderClientId and converts it to gameId using <see cref="ClientManager"/> gamdeId system
     /// </summary>
-    public static int GetSenderClientGameId(this ServerRpcParams receive)
+    public static int GetSenderClientGameId(this RpcParams receive)
     {
         return ClientManager.GetClientGameId(receive.Receive.SenderClientId);
     }

@@ -31,12 +31,12 @@ namespace Fire_Pixel.Networking
                 return;
             }
 #endif
-            SyncedActionScheduler.Instance.UnRegisterSyncedAction_ServerRPC(Id);
+            SyncedActionScheduler.Instance.UnRegisterSyncedActionRpc(Id);
         }
 
-        public void Schedule_ServerRPC(float delaySeconds)
+        public void ScheduleRpc(float delaySeconds)
         {
-            SyncedActionScheduler.Instance.ScheduleSyncedAction_ServerRPC(Id, NetworkManager.Singleton.ServerTime.Time, delaySeconds);
+            SyncedActionScheduler.Instance.ScheduleSyncedActionRpc(Id, NetworkManager.Singleton.ServerTime.Time, delaySeconds);
         }
 
         public void ScheduleLocal(double timeStamp)
