@@ -1,0 +1,113 @@
+{
+    "version": 1,
+    "name": "Player Controls",
+    "maps": [
+        {
+            "name": "Gameplay",
+            "id": "22022a5d-8c01-429b-bb5c-df2c455aea34",
+            "actions": [],
+            "bindings": []
+        },
+        {
+            "name": "Misc",
+            "id": "2dbb850e-0821-4128-b45d-7846171724d6",
+            "actions": [
+                {
+                    "name": "CancelRebind",
+                    "type": "Button",
+                    "id": "274dd6cd-6b0d-4d9f-b70e-3614c3259c05",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "ToggleMenu",
+                    "type": "Button",
+                    "id": "01751583-07a0-41c6-a5b7-4bc8ad99e603",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a52befe9-419b-4cf1-ad38-65f868417885",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CancelRebind",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e566a565-51cf-4cc3-b282-13a88a0b5cd3",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Dev",
+            "id": "3316f62a-6994-4e6f-9f17-96f87da0f4db",
+            "actions": [
+                {
+                    "name": "1",
+                    "type": "Button",
+                    "id": "e967cee6-2e9c-454c-9e63-86e7e2cf4b8e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "2",
+                    "type": "Button",
+                    "id": "f5725f32-6179-455a-bd4e-60dbea33c4f5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "4646ed9c-9d23-4f0d-b25a-54ee00a16a24",
+                    "path": "<Keyboard>/f10",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d93abbda-df43-4a0b-849f-5e3ffa139577",
+                    "path": "<Keyboard>/f11",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

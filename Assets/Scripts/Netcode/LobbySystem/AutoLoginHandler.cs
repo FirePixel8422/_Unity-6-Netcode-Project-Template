@@ -9,21 +9,10 @@ namespace Fire_Pixel.Networking
     public class AutoLoginHandler : MonoBehaviour
     {
         [SerializeField] private string mainSceneName = "Main Menu";
-        private string loginSceneName;
-
-        private AsyncOperation mainSceneLoadOperation;
 
 
         private async void Awake()
         {
-            loginSceneName = SceneManager.CurrentSceneName;
-            mainSceneLoadOperation = SceneManager.LoadSceneAsync(mainSceneName, LoadSceneMode.Additive, false);
-
-            mainSceneLoadOperation.completed += (_) =>
-            {
-                SceneManager.UnLoadSceneAsync(loginSceneName);
-            };
-
             await UnityServices.InitializeAsync();
 
             //AuthenticationService.Instance.SignOut();
@@ -31,9 +20,9 @@ namespace Fire_Pixel.Networking
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
             //DebugLogger.Log("Logged into saved account!");
-            //Debug.Log("Player ID: " + AuthenticationService.Instance.PlayerId);
+            //DebugLogger.Log("Player ID: " + AuthenticationService.Instance.PlayerId);
 
-            mainSceneLoadOperation.allowSceneActivation = true;
+            SceneManager.LoadScene(mainSceneName);
         }
     }
 }

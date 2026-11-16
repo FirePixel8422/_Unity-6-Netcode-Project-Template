@@ -2,7 +2,6 @@
 using UnityEditor;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Utility
 {
     [CustomPropertyDrawer(typeof(MessageIfAttribute), true)]
@@ -64,6 +63,7 @@ namespace Fire_Pixel.Utility
                 case SerializedPropertyType.Float:
                     value = property.floatValue;
                     break;
+
                 case SerializedPropertyType.Boolean:
                     value = property.boolValue ? 1 : 0;
                     break;
@@ -74,6 +74,7 @@ namespace Fire_Pixel.Utility
 
             return CompareNumeric(value, attr);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsNull(SerializedProperty property)
         {
@@ -92,6 +93,7 @@ namespace Fire_Pixel.Utility
                     return false;
             }
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool CompareNumeric(float value, MessageIfAttribute attr)
         {
@@ -102,7 +104,6 @@ namespace Fire_Pixel.Utility
 
                 case ComparisonType.False:
                     return Mathf.Approximately(value, 0);
-
 
                 case ComparisonType.LessThan:
                     return value < attr.Value;

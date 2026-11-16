@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 
@@ -9,6 +10,8 @@ namespace Fire_Pixel.Utility
     {
         private const float FoldoutWidth = 16f;
         private const float AlignFix = 2f;
+
+        private static readonly Dictionary<string, bool> ExpandedStates = new();
 
         public override float GetPropertyHeight(
             SerializedProperty property,
@@ -40,11 +43,21 @@ namespace Fire_Pixel.Utility
                     continue;
                 }
 
+                string key =
+                    property.propertyPath + "." + iterator.propertyPath;
+
+                if (ExpandedStates.TryGetValue(key, out bool expanded))
+                {
+                    iterator.isExpanded = expanded;
+                }
+
                 height +=
                     InspectorButtonDrawer.GetPropertyHeight(
                         so,
                         iterator) +
                     EditorGUIUtility.standardVerticalSpacing;
+
+                ExpandedStates[key] = iterator.isExpanded;
 
                 enterChildren = false;
             }
@@ -200,6 +213,14 @@ namespace Fire_Pixel.Utility
                         continue;
                     }
 
+                    string key =
+                        property.propertyPath + "." + iterator.propertyPath;
+
+                    if (ExpandedStates.TryGetValue(key, out bool expanded))
+                    {
+                        iterator.isExpanded = expanded;
+                    }
+
                     float propertyHeight =
                         InspectorButtonDrawer.GetPropertyHeight(
                             so,
@@ -215,6 +236,9 @@ namespace Fire_Pixel.Utility
                         propertyRect,
                         so,
                         iterator);
+
+                    ExpandedStates[key] =
+                        iterator.isExpanded;
 
                     y +=
                         propertyHeight +

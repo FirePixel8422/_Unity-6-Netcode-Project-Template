@@ -11,7 +11,7 @@ namespace Fire_Pixel.Utility
         {
             if (!ShouldShow(property))
             {
-                return 0f;
+                return -EditorGUIUtility.standardVerticalSpacing;
             }
 
             return EditorGUI.GetPropertyHeight(property, label, true);
@@ -38,7 +38,7 @@ namespace Fire_Pixel.Utility
                 return true;
             }
 
-            return Evaluate(condition);
+            return Evaluate(condition, attr.compareState);
         }
 
         private static SerializedProperty FindCondition(SerializedProperty property, string condition)
@@ -108,9 +108,9 @@ namespace Fire_Pixel.Utility
             return false;
         }
 
-        private static bool Evaluate(SerializedProperty prop)
+        private static bool Evaluate(SerializedProperty prop, bool compareState)
         {
-            return prop.propertyType switch
+            bool result = prop.propertyType switch
             {
                 SerializedPropertyType.Boolean => prop.boolValue,
                 SerializedPropertyType.ObjectReference => prop.objectReferenceValue != null,
@@ -119,6 +119,8 @@ namespace Fire_Pixel.Utility
                 SerializedPropertyType.Enum => prop.enumValueIndex != 0,
                 _ => true
             };
+
+            return result == compareState;
         }
     }
 }

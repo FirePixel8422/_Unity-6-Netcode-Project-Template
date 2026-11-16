@@ -2,6 +2,7 @@ using Fire_Pixel.Utility;
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 namespace Fire_Pixel.Networking
@@ -25,9 +26,7 @@ namespace Fire_Pixel.Networking
         public static OneTimeAction PostInitialized = new OneTimeAction();
 #pragma warning restore UDR0001
 
-#if Enable_Debug_Systems
-        public bool LogDebugInfo = true;
-#endif
+        [field: SerializeField] public bool LogDebugInfo { get; private set; } = true;
 
 
         #region PlayerIdDataArray var get, set and sync methods
@@ -291,8 +290,8 @@ namespace Fire_Pixel.Networking
             {
 #if Enable_Debug_Systems
                 // Destroy the rejoin reference on the kicked client
-                bool deletionSucces = FileManager.TryDeleteFile(LobbyMaker.REJOINDATA_PATH);
-                DebugLogger.Log($"{LobbyMaker.REJOINDATA_PATH} deleted: " + deletionSucces, LogDebugInfo);
+                bool deletionSucces = SaveData.Delete(LobbyMaker.REJOINDATA_SAVEDATA);
+                DebugLogger.Log($"{LobbyMaker.REJOINDATA_SAVEDATA} deleted: " + deletionSucces, LogDebugInfo);
 #else
                 // Destroy the rejoin reference on the kicked client
                 FileManager.TryDeleteFile(LobbyMaker.REJOINDATA_PATH);

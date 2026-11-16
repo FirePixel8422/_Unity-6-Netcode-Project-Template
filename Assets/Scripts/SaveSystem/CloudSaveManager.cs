@@ -3,33 +3,24 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.CloudSave;
 using Unity.Services.CloudSave.Models;
-using UnityEngine;
-
 
 namespace FirePixel.Networking
 {
-    /// <summary>
-    /// Utility class to Save/Load data from or to User unique cloud or global cloud, supporting local fallback through <see cref="FileManager"></see>
-    /// </summary>
+    /// <summary>Provides access to Unity Cloud Save with optional local SaveData fallback.</summary>
     public static class CloudSaveManager
     {
-        #region User Cloud System
-
-        /// <summary>
-        /// Save a value to the User's Unity Cloud Save service.
-        /// Also Save Local Fallback through <see cref="FileManager"></see> if <paramref name="localFallbackPath"/> is provided
-        /// </summary>
-        public static async Task<bool> SaveInfoToUserCloudAsync<T>(T data, string key, string localFallbackPath = "")
+        /// <summary>Saves a value to the user's cloud data and optionally to local SaveData.</summary>
+        public static async Task<bool> SaveToUserCloudAsync<T>(T data, string key, string localFallbackKey = "")
         {
             try
             {
-                // Serialize and save
-                await CloudSaveService.Instance.Data.Player.SaveAsync(new Dictionary<string, object> { { key, data } });
-                
-                if (localFallbackPath != "")
+                await CloudSaveService.Instance.Data.Player.SaveAsync(new Dictionary<string, object>
                 {
-                    await FileManager.SaveInfoAsync(new ValueWrapper<T>(data), localFallbackPath);
-                }
+                    { key, data }
+                });
+
+                if (localFallbackKey != "")
+                    SaveData.Set(localFallbackKey, data);
 
                 return true;
             }
@@ -40,51 +31,39 @@ namespace FirePixel.Networking
             }
         }
 
-        /// <summary>
-        /// Load a value from the User's Unity Cloud Save service.
-        /// Load Local Fallback through <see cref="FileManager"/> if cloud load fails. (Only if <paramref name="localFallbackPath"/> is provided)
-        /// </summary>
-        public static async Task<(bool Succes, T Value)> LoadInfoFromUserCloudAsync<T>(string key, string localFallbackPath = "")
+        /// <summary>Loads a value from the user's cloud data and optionally falls back to local SaveData.</summary>
+        public static async Task<(bool Success, T Value)> LoadFromUserCloudAsync<T>(string key, string localFallbackKey = "")
         {
             try
             {
-                var result = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { key });
+                Dictionary<string, Item> result = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { key });
 
                 if (result.TryGetValue(key, out Item item))
-                {
                     return (true, item.Value.GetAs<T>());
-                }
-                else if (string.IsNullOrEmpty(localFallbackPath) == false)
-                {
-                    (bool succes, ValueWrapper<T> data) = await FileManager.LoadInfoAsync<ValueWrapper<T>>(localFallbackPath);
-                    return (succes, data.Value);
-                }
 
-                DebugLogger.LogWarning($"[CloudSave] Key '{key}' not found, and potential fallback failed");
+                if (localFallbackKey != "" && SaveData.TryGet(localFallbackKey, out T value))
+                    return (true, value);
+
+                DebugLogger.LogWarning($"[CloudSave] Key '{key}' not found, and local fallback failed.");
                 return (false, default);
             }
             catch (Exception ex)
             {
-                DebugLogger.LogWarning($"[CloudSave] Failed to load key '{key}': {ex.Message}" + (localFallbackPath != "" ? "" : ", Using local fallback"));
+                DebugLogger.LogWarning($"[CloudSave] Failed to load key '{key}': {ex.Message}");
 
-                if (localFallbackPath != "")
-                {
-                    return await FileManager.LoadInfoAsync<T>(localFallbackPath);
-                }
+                if (localFallbackKey != "" && SaveData.TryGet(localFallbackKey, out T value))
+                    return (true, value);
 
                 return (false, default);
             }
         }
 
-        /// <summary>
-        /// Deletes a value from the User's Unity Cloud Save service if it exists.
-        /// Delete Local Fallback through <see cref="FileManager"></see> if <paramref name="localFallbackPath"/> is provided
-        /// </summary>
-        public static async Task<bool> TryDeleteFileFromUserCloudAsync(string key, string localFallbackPath = "")
+        /// <summary>Deletes a value from the user's cloud data and optionally removes its local SaveData fallback.</summary>
+        public static async Task<bool> TryDeleteFromUserCloudAsync(string key, string localFallbackKey = "")
         {
             try
             {
-                var result = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { key });
+                Dictionary<string, Item> result = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { key });
 
                 if (!result.ContainsKey(key))
                 {
@@ -97,11 +76,8 @@ namespace FirePixel.Networking
                     new Unity.Services.CloudSave.Models.Data.Player.DeleteOptions()
                 );
 
-                // Delete local fallback if path provided
-                if (localFallbackPath != "")
-                {
-                    FileManager.TryDeleteFile(localFallbackPath);
-                }
+                if (localFallbackKey != "")
+                    SaveData.Delete(localFallbackKey);
 
                 return true;
             }
@@ -111,24 +87,5 @@ namespace FirePixel.Networking
                 return false;
             }
         }
-
-
-        #endregion
-
-
-
-
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
-        ///Global Cloud is a work in progress
     }
 }

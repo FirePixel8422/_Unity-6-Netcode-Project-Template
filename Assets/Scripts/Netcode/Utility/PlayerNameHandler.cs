@@ -14,14 +14,12 @@ namespace Fire_Pixel.Networking
         private const string PLAYERNAME_PATH = "PlayerName.fpx";
 
 
-        private async void Awake()
+        private void Awake()
         {
-            (bool success, ValueWrapper<string> savedPlayerName) = await FileManager.LoadInfoAsync<ValueWrapper<string>>(PLAYERNAME_PATH);
-
-            if (success)
+            if (SaveData.TryGet(PLAYERNAME_PATH, out string savedPlayerName))
             {
-                nameInputField.text = savedPlayerName.Value;
-                ClientManager.SetLocalUsername(savedPlayerName.Value);
+                nameInputField.text = savedPlayerName;
+                ClientManager.SetLocalUsername(savedPlayerName);
             }
             else
             {
@@ -34,8 +32,7 @@ namespace Fire_Pixel.Networking
             nameInputField.onValueChanged.AddListener(OnInputFieldChanged);
         }
 
-
-        public async void OnInputFieldChanged(string newValue)
+        public void OnInputFieldChanged(string newValue)
         {
             if (string.IsNullOrEmpty(newValue))
             {
@@ -44,12 +41,12 @@ namespace Fire_Pixel.Networking
                 previewTextField.text = funnyName;
                 ClientManager.SetLocalUsername(funnyName);
 
-                FileManager.TryDeleteFile(PLAYERNAME_PATH);
+                SaveData.Delete(PLAYERNAME_PATH);
                 return;
             }
 
             ClientManager.SetLocalUsername(newValue);
-            await FileManager.SaveInfoAsync(new ValueWrapper<string>(newValue), PLAYERNAME_PATH);
+            SaveData.Set(PLAYERNAME_PATH, newValue);
         }
     }
 }

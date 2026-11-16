@@ -7,18 +7,26 @@ namespace Fire_Pixel.Utility
     [CustomPropertyDrawer(typeof(EditorReadOnlyAttribute))]
     public class ReadOnlyDrawer : PropertyDrawer
     {
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        public override float GetPropertyHeight(
+            SerializedProperty property,
+            GUIContent label)
         {
-            // IMPORTANT: lets Unity correctly calculate foldout + children height
-            return EditorGUI.GetPropertyHeight(property, label, true);
+            return InspectorButtonDrawer.GetPropertyHeight(
+                property.serializedObject,
+                property);
         }
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public override void OnGUI(
+            Rect position,
+            SerializedProperty property,
+            GUIContent label)
         {
             EditorGUI.BeginDisabledGroup(true);
 
-            // 'true' = draw children, required for class/struct foldouts
-            EditorGUI.PropertyField(position, property, label, true);
+            InspectorButtonDrawer.DrawProperty(
+                position,
+                property.serializedObject,
+                property);
 
             EditorGUI.EndDisabledGroup();
         }

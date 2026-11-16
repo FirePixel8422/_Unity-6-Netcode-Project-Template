@@ -42,8 +42,8 @@ namespace Fire_Pixel.Networking
         public const string LOBBY_TERMINATED_STR = "LobbyTerminated";
         public const string LOBBY_LAST_HEARTBEAT_STR = "LobbyLastHeartbeatUTC";
 
-        public const string PLAYERGUID_PATH = "PlayerGUID.fpx";
-        public const string REJOINDATA_PATH = "RejoinData.fpx";
+        public const string PLAYERGUID_SAVEDATA = "PlayerGUID.fpx";
+        public const string REJOINDATA_SAVEDATA = "RejoinData.fpx";
 
 
         private void Start()
@@ -53,10 +53,9 @@ namespace Fire_Pixel.Networking
         }
         private async Task InitializeAsync()
         {
-            (bool playerGUIDExists, ValueWrapper<string> playerGUID) = await FileManager.LoadInfoAsync<ValueWrapper<string>>(PLAYERGUID_PATH);
-            if (false && playerGUIDExists)
+            if (SaveData.TryGet(PLAYERGUID_SAVEDATA, out string playerGUID))
             {
-                ClientManager.SetPlayerGUID(playerGUID.Value);
+                ClientManager.SetPlayerGUID(playerGUID);
             }
             else
             {
@@ -64,15 +63,14 @@ namespace Fire_Pixel.Networking
 
                 ClientManager.SetPlayerGUID(newGUID);
 
-                await FileManager.SaveInfoAsync(new ValueWrapper<string>(newGUID), PLAYERGUID_PATH);
+                SaveData.Set(PLAYERGUID_SAVEDATA, newGUID);
             }
 
-            (bool rejoinFileExists, ValueWrapper<string> lastJoinedLobbyId) = await FileManager.LoadInfoAsync<ValueWrapper<string>>(REJOINDATA_PATH);
-            if (rejoinFileExists)
+            if (SaveData.TryGet<string>(REJOINDATA_SAVEDATA, out string lastJoinedLobbyId))
             {
                 try
                 {
-                    Lobby lobby = await LobbyService.Instance.GetLobbyAsync(lastJoinedLobbyId.Value);
+                    Lobby lobby = await LobbyService.Instance.GetLobbyAsync(lastJoinedLobbyId);
 
                     bool lobbyAlive =
                         lobby != null &&
@@ -83,12 +81,12 @@ namespace Fire_Pixel.Networking
                     {
                         // Turn rejoin menu visible and setup rejoin button to call method
                         rejoinMenu.SetActive(true);
-                        rejoinMenu.GetComponentInChildren<Button>().onClick.AddListener(() => _ = RejoinLobbyAsync(lastJoinedLobbyId.Value));
+                        rejoinMenu.GetComponentInChildren<Button>().onClick.AddListener(() => _ = RejoinLobbyAsync(lastJoinedLobbyId));
                     }
                     else
                     {
                         // Destroy the rejoin reference if the lobby doesnt exist (anymore)
-                        FileManager.TryDeleteFile(REJOINDATA_PATH);
+                        SaveData.Delete(REJOINDATA_SAVEDATA);
 
                         DebugLogger.Log("Lobby is null", lobby == null);
                         DebugLogger.Log("Heartbeat: " + long.Parse(lobby.Data[LOBBY_LAST_HEARTBEAT_STR].Value));
@@ -98,7 +96,7 @@ namespace Fire_Pixel.Networking
                 catch (LobbyServiceException e)
                 {
                     DebugLogger.Log("No rejoinable lobby detected:\n" + e.ToString());
-                    FileManager.TryDeleteFile(REJOINDATA_PATH);
+                    SaveData.Delete(REJOINDATA_SAVEDATA);
                 }
             }
         }
@@ -193,7 +191,7 @@ namespace Fire_Pixel.Networking
 
                 Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(ClientManager.LocalUserName + "'s Lobby", maxPlayers, options);
 
-                await LobbyManager.SetLobbyData(lobby, true);
+                LobbyManager.SetLobbyData(lobby, true);
 
                 NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(
                     _hostData.IPv4Address,
@@ -230,7 +228,7 @@ namespace Fire_Pixel.Networking
             }
 
             // Load next scene through network, so all joining clients will also load it automatically
-            SceneManager.LoadSceneOnNetwork_OnServer(nextSceneName);
+            NetworkSceneManager.LoadSceneOnNetwork_OnServer(nextSceneName);
         }
 
 
@@ -254,7 +252,7 @@ namespace Fire_Pixel.Networking
                 // Join oldest joinable lobby
                 Lobby lobby = lobbies[0];
 
-                await LobbyManager.SetLobbyData(lobby, false);
+                LobbyManager.SetLobbyData(lobby, false);
 
                 string joinCode = lobby.Data[JOINCODE_STR].Value;
                 JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
@@ -352,7 +350,7 @@ namespace Fire_Pixel.Networking
                 //    Player = new Player(ClientManager.LocalPlayerGUID)
                 //});
 
-                await LobbyManager.SetLobbyData(lobby);
+                LobbyManager.SetLobbyData(lobby);
 
                 string joinCode = lobby.Data[JOINCODE_STR].Value;
                 JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);

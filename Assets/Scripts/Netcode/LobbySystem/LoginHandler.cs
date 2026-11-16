@@ -60,19 +60,20 @@ namespace Fire_Pixel.Networking
 
         private async void Start()
         {
-            loginSceneName = SceneManager.CurrentSceneName;
-            mainSceneLoadOperation = SceneManager.LoadSceneAsync(mainSceneName, LoadSceneMode.Additive, false);
+            loginSceneName = SceneManager.GetActiveScene().name;
 
-            mainSceneLoadOperation.completed += (_) =>
-            {
-                SceneManager.UnLoadSceneAsync(loginSceneName);
-            };
+            mainSceneLoadOperation = SceneManager.LoadSceneAsync(mainSceneName, LoadSceneMode.Additive);
+            mainSceneLoadOperation.allowSceneActivation = false;
+            mainSceneLoadOperation.completed += UnloadCurrentScene;
 
             await UnityServices.InitializeAsync();
 
             TryAutoLoginWithSessionTokenAsync();
         }
-
+        private void UnloadCurrentScene(AsyncOperation _)
+        {
+            SceneManager.UnloadSceneAsync(loginSceneName);
+        }
 
         private async void TryAutoLoginWithSessionTokenAsync()
         {

@@ -28,7 +28,7 @@ namespace Fire_Pixel.Networking
         /// <summary>
         /// Set the lobby reference for host and clients here and start heartbeat coroutine if called from the server (or host)
         /// </summary>
-        public static async Task SetLobbyData(Lobby lobby, bool calledFromHost = false)
+        public static void SetLobbyData(Lobby lobby, bool calledFromHost = false)
         {
             CurrentLobby = lobby;
 
@@ -40,7 +40,7 @@ namespace Fire_Pixel.Networking
                 return;
             }
 
-            await FileManager.SaveInfoAsync(new ValueWrapper<string>(LobbyId), LobbyMaker.REJOINDATA_PATH);
+            SaveData.Set(LobbyId, LobbyMaker.REJOINDATA_SAVEDATA);
         }
 
         /// <summary>

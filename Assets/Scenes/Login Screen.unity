@@ -1285,7 +1285,7 @@ MonoBehaviour:
   errorTextField: {fileID: 1217195729}
   errorFadeSpeed: 2
   mainSceneName: Main Menu
-  devAutoLogin: 0
+  devAutoLogin: 1
   autoLogOut: 1
   printLoginErrors: 0
 --- !u!1 &877542378

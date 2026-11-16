@@ -8,10 +8,12 @@ namespace Fire_Pixel.Utility
     public sealed class ShowIfAttribute : PropertyAttribute
     {
         public readonly string condition;
+        public readonly bool compareState;
 
-        public ShowIfAttribute(string condition)
+        public ShowIfAttribute(string condition, bool compareState = true)
         {
             this.condition = condition;
+            this.compareState = compareState;
         }
     }
 }
