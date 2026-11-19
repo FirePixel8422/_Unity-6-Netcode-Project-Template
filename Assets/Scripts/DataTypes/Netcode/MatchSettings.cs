@@ -1,6 +1,5 @@
 using Unity.Netcode;
 
-
 namespace Fire_Pixel.Networking
 {
     [System.Serializable]

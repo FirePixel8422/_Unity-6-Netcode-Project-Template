@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
 public class RebindManager : MonoBehaviour
 {
     public static RebindManager Instance { get; private set; }
@@ -25,7 +24,6 @@ public class RebindManager : MonoBehaviour
     private InputActionRebindingExtensions.RebindingOperation currentOperation;
 
     private const string REBINDS_SAVEDATA = "Input/Rebinds";
-
 
 
     private void OnEnable()

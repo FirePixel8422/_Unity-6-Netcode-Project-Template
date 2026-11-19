@@ -1,6 +1,5 @@
 using System;
 
-
 namespace Fire_Pixel.Networking
 {
     /// <summary>

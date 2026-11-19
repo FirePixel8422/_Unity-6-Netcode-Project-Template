@@ -2,7 +2,6 @@ using UnityEngine;
 using Unity.Netcode;
 using Fire_Pixel.Networking;
 
-
 public class NetworkCursorManager : SmartNetworkBehaviour
 {
     public static NetworkCursorManager Instance { get; private set; }

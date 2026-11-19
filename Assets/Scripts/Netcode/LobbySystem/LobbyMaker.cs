@@ -11,8 +11,6 @@ using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
-
-
 namespace Fire_Pixel.Networking
 {
     /// <summary>

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4552873996528808999}
   - component: {fileID: 8744314436956157493}
   m_Layer: 0
-  m_Name: NET_Netcode Management
+  m_Name: Net_NetcodeManagement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -7,7 +7,6 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Networking
 {
     public static class LobbyManager

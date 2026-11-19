@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
 
-
 public class MultiInstanceText : MultiInstanceBehaviour<MultiInstanceText>
 {
     [HideInInspector] public TextMeshProUGUI Text;

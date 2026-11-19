@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 namespace Fire_Pixel.Utility
 {
     /// <summary>
@@ -10,19 +9,18 @@ namespace Fire_Pixel.Utility
     public class OneTimeAction
     {
         private event Action InternalAction;
-        private bool hasExecuted;
-        public bool HasExecuted => hasExecuted;
+        public bool HasExecuted { get; private set; }
 
 
         public void Invoke()
         {
             InternalAction?.Invoke();
             InternalAction = null;
-            hasExecuted = true;
+            HasExecuted = true;
         }
         public static OneTimeAction operator +(OneTimeAction e, Action action)
         {
-            if (!e.hasExecuted)
+            if (!e.HasExecuted)
             {
                 e.InternalAction += action;
             }
@@ -34,7 +32,7 @@ namespace Fire_Pixel.Utility
         }
         public static OneTimeAction operator -(OneTimeAction e, Action action)
         {
-            if (!e.hasExecuted)
+            if (!e.HasExecuted)
             {
                 e.InternalAction -= action;
             }
@@ -49,23 +47,22 @@ namespace Fire_Pixel.Utility
     public class OneTimeAction<T>
     {
         private event Action<T> InternalAction;
-        private bool hasExecuted;
         private T invokedValue;
-        public bool HasExecuted => hasExecuted;
+        public bool HasExecuted { get; private set; }
 
 
         public void Invoke(T value)
         {
-            if (hasExecuted) return;
+            if (HasExecuted) return;
 
             InternalAction?.Invoke(value);
             InternalAction = null;
-            hasExecuted = true;
+            HasExecuted = true;
             invokedValue = value;
         }
         public static OneTimeAction<T> operator +(OneTimeAction<T> e, Action<T> action)
         {
-            if (!e.hasExecuted)
+            if (!e.HasExecuted)
             {
                 e.InternalAction += action;
             }
@@ -77,7 +74,7 @@ namespace Fire_Pixel.Utility
         }
         public static OneTimeAction<T> operator -(OneTimeAction<T> e, Action<T> action)
         {
-            if (!e.hasExecuted)
+            if (!e.HasExecuted)
             {
                 e.InternalAction -= action;
             }

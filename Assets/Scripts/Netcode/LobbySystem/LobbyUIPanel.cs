@@ -2,7 +2,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 namespace Fire_Pixel.Networking
 {
     public class LobbyUIPanel : MonoBehaviour

@@ -3,7 +3,6 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Utility
 {
     /// <summary>
@@ -102,10 +101,12 @@ namespace Fire_Pixel.Utility
         {
             float curvePosition = percent01 * (sampleCount - 1);
 
-            int floorIndex = (int)math.floor(curvePosition);
-            int ceilIndex = (int)curvePosition;
+            int floorIndex = (int)curvePosition;
+            int ceilIndex = math.min(floorIndex + 1, sampleCount - 1);
 
-            return math.lerp(bakedCurve[floorIndex], bakedCurve[ceilIndex], curvePosition - floorIndex);
+            float t = curvePosition - floorIndex;
+
+            return math.lerp(bakedCurve[floorIndex], bakedCurve[ceilIndex], t);
         }
     }
 }

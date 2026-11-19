@@ -1,7 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Utility
 {
     [CustomPropertyDrawer(typeof(EditorReadOnlyAttribute))]

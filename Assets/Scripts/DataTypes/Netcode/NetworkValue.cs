@@ -1,9 +1,6 @@
 ﻿using System;
 using Unity.Collections;
-using Unity.Netcode;
 using UnityEngine;
-
-
 
 namespace Fire_Pixel.Networking
 {

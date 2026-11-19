@@ -1,9 +1,7 @@
-using Fire_Pixel.Networking;
 using System;
 using Unity.Netcode;
 
-
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     public class GameStateManager : SmartNetworkBehaviour
     {

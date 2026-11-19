@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-
 public class ImageColorAnimator : UpdateMonoBehaviour
 {
     [SerializeField] private Color a, b;

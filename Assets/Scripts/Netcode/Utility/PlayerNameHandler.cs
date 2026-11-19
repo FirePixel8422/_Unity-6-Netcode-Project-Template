@@ -1,7 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Networking
 {
     public class PlayerNameHandler : MonoBehaviour

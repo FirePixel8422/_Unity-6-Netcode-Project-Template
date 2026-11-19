@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using Unity.Netcode;
 
-
-
 namespace Fire_Pixel.Networking
 {
     public class SyncedActionScheduler : NetworkBehaviour

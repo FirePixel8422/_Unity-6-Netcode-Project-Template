@@ -2,7 +2,6 @@
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-
 public class MenuInputTrigger : MonoBehaviour
 {
     [SerializeField] private InputActionReference triggerInput;

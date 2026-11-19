@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Networking
 {
     public class LobbyUIMananager : MonoBehaviour

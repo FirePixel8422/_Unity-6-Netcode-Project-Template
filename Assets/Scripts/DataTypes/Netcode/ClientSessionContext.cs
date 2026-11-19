@@ -1,6 +1,5 @@
 ﻿
 
-
 [System.Serializable]
 public struct ClientSessionContext
 {

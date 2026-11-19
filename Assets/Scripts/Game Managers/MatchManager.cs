@@ -1,7 +1,6 @@
 using Fire_Pixel.Utility;
 using Unity.Netcode;
 
-
 namespace Fire_Pixel.Networking
 {
     public class MatchManager : SmartNetworkBehaviour

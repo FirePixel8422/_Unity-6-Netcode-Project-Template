@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3522437456764739600}
   - component: {fileID: 4085540723427612407}
   m_Layer: 5
-  m_Name: NET_Cursor (Canvas)
+  m_Name: Net_Cursors (Canvas)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -115,12 +115,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1188127433
+  GlobalObjectIdHash: 216505402
   InScenePlacedSourceGlobalObjectIdHash: 409557778
+  m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1

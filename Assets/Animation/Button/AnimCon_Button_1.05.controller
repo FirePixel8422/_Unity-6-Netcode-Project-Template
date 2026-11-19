@@ -437,7 +437,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Button 1.05
+  m_Name: AnimCon_Button_1.05
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: Normal

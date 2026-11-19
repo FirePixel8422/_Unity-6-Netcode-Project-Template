@@ -10,12 +10,9 @@ public class AssetNamingPostprocessor : AssetPostprocessor
         {
             string prefix = GetPrefix(path);
 
-            if (prefix == null)
-            {
-                continue;
-            }
+            if (prefix == null || IsGeneratedLightingAsset(path)) continue;
 
-            string fileName = Path.GetFileNameWithoutExtension(path).Replace(" ", "_").TrimStart('_');
+            string fileName = Path.GetFileNameWithoutExtension(path);
 
             if (fileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
@@ -28,6 +25,17 @@ public class AssetNamingPostprocessor : AssetPostprocessor
 
             AssetDatabase.RenameAsset(path, fileName);
         }
+    }
+
+    // Lightmaps and reflection probes are written by the lightmapper into a folder named after the scene
+    // (e.g. Scenes/MyScene/Lightmap-0_comp_light.exr). Renaming them mid-bake breaks the LightingData references and crashes the editor.
+    private static bool IsGeneratedLightingAsset(string path)
+    {
+        if (Lightmapping.isRunning) return true;
+
+        string folder = Path.GetDirectoryName(path)?.Replace('\\', '/');
+
+        return !string.IsNullOrEmpty(folder) && File.Exists(folder + ".unity");
     }
 
     private static string GetPrefix(string path)
@@ -58,6 +66,20 @@ public class AssetNamingPostprocessor : AssetPostprocessor
             ".exr" => "Tex_",
             ".hdr" => "Tex_",
             ".bmp" => "Tex_",
+
+            ".anim" => "Anim_",
+            ".controller" => "AnimCon_",
+
+            ".wav" => "Aud_",
+            ".mp3" => "Aud_",
+            ".ogg" => "Aud_",
+            ".aiff" => "Aud_",
+            ".aif" => "Aud_",
+            ".flac" => "Aud_",
+            ".mod" => "Aud_",
+            ".it" => "Aud_",
+            ".s3m" => "Aud_",
+            ".xm" => "Aud_",
 
             ".shader" => "Sha_",
             ".shadergraph" => "Sha_",

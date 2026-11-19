@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
 public class TooltipHandler : UpdateMonoBehaviour
 {
     [SerializeField] private GameObject tooltipPrefab;
@@ -41,9 +40,9 @@ public class TooltipHandler : UpdateMonoBehaviour
         wordColorHexLookup = new Dictionary<string, string>(toolTipWordCount);
         for (int i = 0; i < toolTipWordCount; i++)
         {
-            string lower = toolTipWords[i].word.ToLowerInvariant();
+            string lower = toolTipWords[i].Word.ToLowerInvariant();
             wordToTooltipId[lower] = i;
-            wordColorHexLookup[lower] = ColorUtility.ToHtmlStringRGB(toolTipWords[i].wordColor);
+            wordColorHexLookup[lower] = ColorUtility.ToHtmlStringRGB(toolTipWords[i].Color);
         }
 
         // Get all TMP children
@@ -147,24 +146,24 @@ public class TooltipHandler : UpdateMonoBehaviour
 
             float hoveredWordHeight = Mathf.Abs(tr.y - bl.y);
 
-            tooltipText.text = tooltipData.toolTip;
+            tooltipText.text = tooltipData.ToolTip;
             tooltipText.textWrappingMode = TextWrappingModes.Normal;
 
-            tooltipRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, tooltipData.width);
-            tooltipRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tooltipData.height);
+            tooltipRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, tooltipData.Width);
+            tooltipRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tooltipData.Height);
                 
             tooltipText.ForceMeshUpdate();
 
             Vector3 offset = new Vector3(
                 0f,
-                hoveredWordHeight * 0.5f + tooltipData.height * 0.5f,
+                hoveredWordHeight * 0.5f + tooltipData.Height * 0.5f,
                 0f
             );
 
             Vector3 finalPos = screenPos + offset;
 
-            finalPos.x = Mathf.Clamp(finalPos.x, tooltipData.width * 0.5f, screenSize.x - tooltipData.width * 0.5f);
-            finalPos.y = Mathf.Clamp(finalPos.y, tooltipData.height * 0.5f, screenSize.y - tooltipData.height * 0.5f);
+            finalPos.x = Mathf.Clamp(finalPos.x, tooltipData.Width * 0.5f, screenSize.x - tooltipData.Width * 0.5f);
+            finalPos.y = Mathf.Clamp(finalPos.y, tooltipData.Height * 0.5f, screenSize.y - tooltipData.Height * 0.5f);
 
             activeTooltip.transform.position = finalPos;
             activeTooltip.SetActiveSmart(true);

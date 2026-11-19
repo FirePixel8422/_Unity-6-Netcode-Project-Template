@@ -2,7 +2,6 @@
 using System;
 using Unity.Netcode;
 
-
 namespace Fire_Pixel.Networking
 {
     /// <summary>

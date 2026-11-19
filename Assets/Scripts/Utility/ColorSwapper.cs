@@ -3,17 +3,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 
-
 public class ColorSwapper : MonoBehaviour
 {
     [SerializeField] private Color colorA;
     [SerializeField] private Color colorB;
 
-    [SerializeField] private bool swap;
-    [SerializeField] private bool reverseSwap;
 
-
-    [ContextMenu("Swap Colors")]
+    [InspectorButton]
     private void SwapColors()
     {
         DebugLogger.Log("Swapping colors...");
@@ -50,10 +46,10 @@ public class ColorSwapper : MonoBehaviour
         }
     }
 
-    [ContextMenu("Undo Swap Colors")]
-    private void UndoSwapColors()
+    [InspectorButton]
+    private void ReverseSwapColors()
     {
-        DebugLogger.Log("Undo swapping colors...");
+        DebugLogger.Log("Reverse swapping colors...");
 
         Image[] images = this.FindObjectsOfType<Image>(true);
 
@@ -82,21 +78,6 @@ public class ColorSwapper : MonoBehaviour
             Image image = targets[i];
             image.color = colorA;
             EditorUtility.SetDirty(image);
-        }
-    }
-
-    private void OnValidate()
-    {
-        if (swap)
-        {
-            swap = false;
-            SwapColors();
-        }
-
-        if (reverseSwap)
-        {
-            reverseSwap = false;
-            UndoSwapColors();
         }
     }
 }

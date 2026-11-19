@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1842494467557109432}
   - component: {fileID: 3860541492353823203}
   m_Layer: 0
-  m_Name: NET_MatchManager
+  m_Name: Net_MatchManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

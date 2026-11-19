@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-
-
 public class UIComponentGroup : MonoBehaviour
 {
     [Header("<<Info>>\nAdd Max 1 Slider, 1 Toggle and 1 InputField on or under this GamObject")]

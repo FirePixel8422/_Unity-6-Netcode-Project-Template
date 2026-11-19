@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Unity.Services.CloudSave;
 using Unity.Services.CloudSave.Models;
 
-namespace FirePixel.Networking
+namespace Fire_Pixel.Networking
 {
     /// <summary>Provides access to Unity Cloud Save with optional local SaveData fallback.</summary>
     public static class CloudSaveManager

@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-
 public class NetworkCursorHandler : MonoBehaviour
 {
     [SerializeField] private float updateInterval = 0.02f;

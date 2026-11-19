@@ -3,7 +3,6 @@ using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
 namespace Fire_Pixel.Networking
 {
     public class AutoLoginHandler : MonoBehaviour

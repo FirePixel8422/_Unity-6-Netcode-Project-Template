@@ -9,11 +9,8 @@ public class FontSwapper : MonoBehaviour
     [SerializeField] private TMP_FontAsset fontA;
     [SerializeField] private TMP_FontAsset fontB;
 
-    [SerializeField] private bool swap;
-    [SerializeField] private bool reverseSwap;
 
-    
-    [ContextMenu("Swap Fonts")]
+    [InspectorButton]
     private void SwapFonts()
     {
         DebugLogger.Log("Swapping fonts...");
@@ -55,11 +52,10 @@ public class FontSwapper : MonoBehaviour
         DebugLogger.Log($"Swapped {targets.Count} fonts.");
     }
 
-
-    [ContextMenu("Undo Swap Fonts")]
-    private void UndoSwapFonts()
+    [InspectorButton]
+    private void ReverseSwapFonts()
     {
-        DebugLogger.Log("Undo swapping fonts...");
+        DebugLogger.Log("Reverse swapping fonts...");
 
         TMP_Text[] texts = this.FindObjectsOfType<TMP_Text>(true);
 
@@ -96,22 +92,6 @@ public class FontSwapper : MonoBehaviour
         Undo.CollapseUndoOperations(group);
 
         DebugLogger.Log($"Restored {targets.Count} fonts.");
-    }
-
-
-    private void OnValidate()
-    {
-        if (swap)
-        {
-            swap = false;
-            SwapFonts();
-        }
-
-        if (reverseSwap)
-        {
-            reverseSwap = false;
-            UndoSwapFonts();
-        }
     }
 }
 #endif

@@ -1,13 +1,10 @@
 ﻿using Fire_Pixel.Networking;
-using Fire_Pixel.Utility;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 
 public static class ExtensionMethods
 {

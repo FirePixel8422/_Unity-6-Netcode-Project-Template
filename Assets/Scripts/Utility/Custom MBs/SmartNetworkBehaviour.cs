@@ -1,7 +1,6 @@
 ﻿using Fire_Pixel.Utility;
 using Unity.Netcode;
 
-
 namespace Fire_Pixel.Networking
 {
     /// <summary>
@@ -54,7 +53,7 @@ namespace Fire_Pixel.Networking
 
             CallbackScheduler.RegisterCallback(OnNetworkTick, CallbackType.NetworkTick);
         }
-        private void Start()
+        protected virtual void Start()
         {
             if (isPostSpawnReady)
             {

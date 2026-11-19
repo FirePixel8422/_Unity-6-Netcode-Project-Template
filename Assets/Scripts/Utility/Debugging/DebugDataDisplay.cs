@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-
 public class DebugDataDisplay : UpdateMonoBehaviour
 {
     [SerializeField, Tooltip("Average over this many seconds")]

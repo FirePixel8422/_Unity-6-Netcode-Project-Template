@@ -2,7 +2,6 @@
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-
 public class ButtonInputTrigger : MonoBehaviour
 {
     [SerializeField] private InputActionReference triggerInput;

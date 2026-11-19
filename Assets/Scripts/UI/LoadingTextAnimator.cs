@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 
-
 public class LoadingTextAnimator : UpdateMonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI loadingtext;

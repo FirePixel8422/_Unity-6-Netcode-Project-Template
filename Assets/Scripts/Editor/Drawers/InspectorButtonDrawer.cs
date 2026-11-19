@@ -4,7 +4,6 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Utility
 {
     public static class InspectorButtonDrawer

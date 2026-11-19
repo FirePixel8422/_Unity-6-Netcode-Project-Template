@@ -3,7 +3,6 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Networking
 {
     public class PingDisplayer : SmartNetworkBehaviour

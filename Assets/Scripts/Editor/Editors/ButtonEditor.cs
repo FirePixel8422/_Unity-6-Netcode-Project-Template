@@ -2,7 +2,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 namespace Fire_Pixel.Utility
 {
     [CustomEditor(typeof(Button))]

@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 
-
 public class AutoSizeBackground : UpdateMonoBehaviour
 {
     [SerializeField] private RectTransform background;

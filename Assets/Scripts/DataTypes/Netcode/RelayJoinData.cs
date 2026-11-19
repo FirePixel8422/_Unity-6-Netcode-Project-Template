@@ -1,10 +1,10 @@
 using System;
-using UnityEngine;
-
 
 namespace Fire_Pixel.Networking
 {
-    [Tooltip("Data container for connecting to a server")]
+    /// <summary>
+    /// Data container for connecting to a server
+    /// </summary>
     public struct RelayJoinData
     {
         public string JoinCode;

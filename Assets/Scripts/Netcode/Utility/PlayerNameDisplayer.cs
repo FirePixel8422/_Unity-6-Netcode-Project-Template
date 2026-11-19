@@ -2,7 +2,6 @@
 using Unity.Netcode;
 using TMPro;
 
-
 namespace Fire_Pixel.Networking
 {
     public class PlayerNameDisplayer : NetworkBehaviour

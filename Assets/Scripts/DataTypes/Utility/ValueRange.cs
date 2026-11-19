@@ -1,7 +1,6 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-
 /// <summary>
 /// A lightweight range that holds an int Min and int Max.
 /// </summary>

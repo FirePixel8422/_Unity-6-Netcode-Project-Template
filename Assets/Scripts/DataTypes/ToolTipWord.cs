@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
 
-
 [System.Serializable]
 public struct ToolTipWord
 {
-    public string word;
-    public Color wordColor;
+    [field: SerializeField] public string Word { get; private set; }
+    [field: SerializeField] public Color Color { get; private set; }
 
-    [TextArea]
-    public string toolTip;
+    [field: TextArea]
+    [field: SerializeField] public string ToolTip { get; private set; }
 
-    [Header("Layout")]
-    public float width;
-    public float height;
+    [field: Header("Layout")]
+    [field: SerializeField] public float Width { get; private set; }
+    [field: SerializeField] public float Height { get; private set; }
 }
