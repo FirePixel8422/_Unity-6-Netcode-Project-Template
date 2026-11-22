@@ -5,10 +5,22 @@ using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 public static class ExtensionMethods
 {
     #region Transform Logic
+
+    public static Transform Transform(this Object obj)
+    {
+        return obj switch
+        {
+            GameObject go => go.transform,
+            Component component => component.transform,
+            _ => null
+        };
+    }
 
     public static void SetParent(this Transform trans, Transform parent, bool keepLocalPos, bool keepLocalRot)
     {
@@ -60,39 +72,39 @@ public static class ExtensionMethods
 
     #region (Try)GetComponent(s)
 
-    public static bool TryGetComponents<T>(this Transform trans, out T[] components) where T : UnityEngine.Object
+    public static bool TryGetComponents<T>(this Object obj, out T[] components) where T : Component
     {
-        components = trans.GetComponents<T>();
+        components = obj.Transform().GetComponents<T>();
 
         return components.Length > 0;
     }
 
-    public static bool TryGetComponentInChildren<T>(this Transform trans, out T component, bool includeInactive = false) where T : UnityEngine.Object
+    public static bool TryGetComponentInChildren<T>(this Object obj, out T component, bool includeInactive = false) where T : Component
     {
-        component = trans.GetComponentInChildren<T>(includeInactive);
+        component = obj.Transform().GetComponentInChildren<T>(includeInactive);
         return component != null;
     }
-    public static bool TryGetComponentsInChildren<T>(this Transform trans, out T[] components, bool includeInactive) where T : UnityEngine.Object
+    public static bool TryGetComponentsInChildren<T>(this Object obj, out T[] components, bool includeInactive) where T : Component
     {
-        components = trans.GetComponentsInChildren<T>(includeInactive);
+        components = obj.Transform().GetComponentsInChildren<T>(includeInactive);
 
         return components.Length > 0;
     }
 
-    public static bool TryGetComponentInParent<T>(this Transform trans, out T component) where T : UnityEngine.Object
+    public static bool TryGetComponentInParent<T>(this Object obj, out T component) where T : Component
     {
-        component = trans.GetComponentInParent<T>();
+        component = obj.Transform().GetComponentInParent<T>();
         return component != null;
     }
-    public static bool TryGetComponentsInParent<T>(this Transform trans, out T[] component) where T : UnityEngine.Object
+    public static bool TryGetComponentsInParent<T>(this Object obj, out T[] component) where T : Component
     {
-        component = trans.GetComponentsInParent<T>();
+        component = obj.Transform().GetComponentsInParent<T>();
         return component != null;
     }
 
-    public static bool TryGetComponentInParentRecursively<T>(this Transform trans, bool checkStartTransform, out T component) where T : UnityEngine.Object
+    public static bool TryGetComponentInParentRecursively<T>(this Object obj, bool checkStartTransform, out T component) where T : Component
     {
-        Transform current = checkStartTransform ? trans : trans.parent;
+        Transform current = checkStartTransform ? obj.Transform() : obj.Transform().parent;
 
         while (current != null)
         {
@@ -113,29 +125,28 @@ public static class ExtensionMethods
 
     #region (Try)FindObjectOfType
 
-    public static bool TryFindObjectOfType<T>(this UnityEngine.Object obj, out T component, bool includeInactive = false) where T : UnityEngine.Object
+    public static bool TryFindObjectOfType<T>(this Object _, out T component, bool includeInactive = false) where T : Object
     {
         FindObjectsInactive findObjectsInactive = includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude;
 
-        component = UnityEngine.Object.FindFirstObjectByType<T>(findObjectsInactive);
+        component = Object.FindFirstObjectByType<T>(findObjectsInactive);
         return component != null;
     }
-    public static bool TryFindObjectsOfType<T>(this UnityEngine.Object obj, out T[] component, bool includeInactive = false, bool sortByInstanceID = false) where T : UnityEngine.Object
+    public static bool TryFindObjectsOfType<T>(this Object _, out T[] component, bool includeInactive = false, bool sortByInstanceID = false) where T : Object
     {
         FindObjectsInactive findObjectsInactive = includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude;
         FindObjectsSortMode sortMode = sortByInstanceID ? FindObjectsSortMode.InstanceID : FindObjectsSortMode.None;
 
-        component = UnityEngine.Object.FindObjectsByType<T>(findObjectsInactive, sortMode);
+        component = Object.FindObjectsByType<T>(findObjectsInactive, sortMode);
         return component != null;
     }
 
-    // Unity 6s new FindobjectOfType is stupid
-    public static T FindObjectOfType<T>(this UnityEngine.Object obj) where T : UnityEngine.Object
+    public static T FindObjectOfType<T>(this Object _) where T : Object
     {
-        return UnityEngine.Object.FindFirstObjectByType<T>();
+        return Object.FindFirstObjectByType<T>();
     }
 
-    public static T[] FindObjectsOfType<T>(this UnityEngine.Object obj, bool includeInactive = false, bool sortByInstanceID = false) where T : UnityEngine.Object
+    public static T[] FindObjectsOfType<T>(this Object _, bool includeInactive = false, bool sortByInstanceID = false) where T : Object
     {
         FindObjectsInactive findObjectsInactive = includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude;
         FindObjectsSortMode sortMode = sortByInstanceID ? FindObjectsSortMode.InstanceID : FindObjectsSortMode.None;
@@ -148,9 +159,9 @@ public static class ExtensionMethods
 
     #region GetComponents Ordered
 
-    public static T[] GetComponentsOrdered<T>(this Component comp) where T : Component
+    public static T[] GetComponentsOrdered<T>(this Object obj) where T : Component
     {
-        T[] components = comp.GetComponents<T>();
+        T[] components = obj.Transform().GetComponents<T>();
 
         System.Array.Sort(components, (a, b) =>
         {
@@ -160,9 +171,9 @@ public static class ExtensionMethods
         return components;
     }
 
-    public static T[] GetComponentsInChildrenOrdered<T>(this Transform trans, bool includeInactive = false) where T : Component
+    public static T[] GetComponentsInChildrenOrdered<T>(this Object obj, bool includeInactive = false) where T : Component
     {
-        T[] components = trans.GetComponentsInChildren<T>(includeInactive);
+        T[] components = obj.Transform().GetComponentsInChildren<T>(includeInactive);
 
         System.Array.Sort(components, (a, b) =>
         {
@@ -174,9 +185,9 @@ public static class ExtensionMethods
         return components;
     }
 
-    public static T[] GetComponentsInParentOrdered<T>(this Transform trans, bool includeInactive = false) where T : Component
+    public static T[] GetComponentsInParentOrdered<T>(this Object obj, bool includeInactive = false) where T : Component
     {
-        T[] components = trans.GetComponentsInParent<T>(includeInactive);
+        T[] components = obj.Transform().GetComponentsInParent<T>(includeInactive);
 
         System.Array.Sort(components, (a, b) =>
         {
@@ -190,9 +201,9 @@ public static class ExtensionMethods
 
     public static T[] FindObjectsOfTypeOrdered<T>() where T : Component
     {
-        T[] objects = UnityEngine.Object.FindObjectsByType<T>(FindObjectsSortMode.None);
+        T[] objects = Object.FindObjectsByType<T>(FindObjectsSortMode.None);
         
-        System.Array.Sort(objects, (a, b) =>
+        Array.Sort(objects, (a, b) =>
         {
             string pathA = GetHierarchyPath(a.transform);
             string pathB = GetHierarchyPath(b.transform);
@@ -221,19 +232,19 @@ public static class ExtensionMethods
 
     #region HasComponent
 
-    public static bool HasComponent<T>(this Transform trans) where T : Component
+    public static bool HasComponent<T>(this Object obj) where T : Component
     {
-        return trans.GetComponent<T>() != null;
+        return obj.Transform().GetComponent<T>() != null;
     }
 
-    public static bool HasComponentInChildren<T>(this Transform trans, bool includeInactive = false) where T : Component
+    public static bool HasComponentInChildren<T>(this Object obj, bool includeInactive = false) where T : Component
     {
-        return trans.GetComponentInChildren<T>(includeInactive) != null;
+        return obj.Transform().GetComponentInChildren<T>(includeInactive) != null;
     }
 
-    public static bool HasComponentInParent<T>(this Transform trans, bool includeInactive = false) where T : Component
+    public static bool HasComponentInParent<T>(this Object obj, bool includeInactive = false) where T : Component
     {
-        return trans.GetComponentInParent<T>(includeInactive) != null;
+        return obj.Transform().GetComponentInParent<T>(includeInactive) != null;
     }
 
     #endregion
@@ -351,7 +362,7 @@ public static class ExtensionMethods
     #endregion
 
 
-    #region Array/List/NativeCollection Shuffle
+    #region List/Array Shuffle Shuffle
 
     /// <summary>
     /// Randomly shuffles the content of the array in place using Fisher–Yates.
@@ -454,82 +465,159 @@ public static class ExtensionMethods
     #endregion
 
 
-    #region Array Utility
+    #region List/Array SelectRandom
 
-    /// <summary>
-    /// Selects and returns a random entry of array.
-    /// </summary>
+    /// <summary>Selects and returns a random entry of Array.</summary>
     public static T SelectRandom<T>(this T[] targetArray)
     {
-        return targetArray[UnityEngine.Random.Range(0, targetArray.Length)];
+        return targetArray[Random.Range(0, targetArray.Length)];
+    }
+    /// <summary>Selects and returns a random entry of List.</summary>
+    public static T SelectRandom<T>(this List<T> targetList)
+    {
+        return targetList[Random.Range(0, targetList.Count)];
+    }
+    /// <summary>Selects and returns a random entry of NativeArray.</summary>
+    public static T SelectRandom<T>(this NativeArray<T> targetArray) where T : struct
+    {
+        return targetArray[Random.Range(0, targetArray.Length)];
+    }
+    /// <summary>Selects and returns a random entry of NativeList.</summary>
+    public static T SelectRandom<T>(this NativeList<T> targetList) where T : unmanaged
+    {
+        return targetList[Random.Range(0, targetList.Length)];
     }
 
-    /// <summary>
-    /// Selects and returns a random array filled with entries of <paramref name="targetArray"/>
-    /// </summary>
+    /// <summary>Selects and returns a random list filled with entries of <paramref name="targetArray"/></summary>
     public static T[] SelectRandomRange<T>(this T[] targetArray, int entryCount, bool forceUniqueEntries = true)
     {
         T[] output = new T[entryCount];
 
-        if (forceUniqueEntries)
+        if (!forceUniqueEntries)
         {
-            List<int> numberPot = new List<int>(entryCount);
-            for (int i = 0; i < targetArray.Length; i++)
-            {
-                numberPot.Add(i);
-            }
-
-            int r;
             for (int i = 0; i < entryCount; i++)
             {
-                r = UnityEngine.Random.Range(0, numberPot.Count);
-
-                output[i] = targetArray[numberPot[r]];
-
-                numberPot.RemoveAt(r);
+                output[i] = targetArray[Random.Range(0, targetArray.Length)];
             }
+            return output;
         }
-        else
+
+        List<int> numberPot = new List<int>(targetArray.Length);
+        for (int i = 0; i < targetArray.Length; i++)
         {
-            int r;
+            numberPot.Add(i);
+        }
+        for (int i = 0; i < entryCount; i++)
+        {
+            int r = Random.Range(0, numberPot.Count);
+            output[i] = targetArray[numberPot[r]];
+            numberPot.RemoveAt(r);
+        }
+        return output;
+    }
+    /// <summary>Selects and returns a random list filled with entries of <paramref name="targetList"/></summary>
+    public static T[] SelectRandomRange<T>(this List<T> targetList, int entryCount, bool forceUniqueEntries = true)
+    {
+        T[] output = new T[entryCount];
+
+        if (!forceUniqueEntries)
+        {
             for (int i = 0; i < entryCount; i++)
             {
-                r = UnityEngine.Random.Range(0, entryCount);
-
-                output[i] = targetArray[r];
+                output[i] = targetList[Random.Range(0, targetList.Count)];
             }
+            return output;
+        }
+
+        List<int> numberPot = new List<int>(targetList.Count);
+        for (int i = 0; i < targetList.Count; i++)
+        {
+            numberPot.Add(i);
+        }
+        for (int i = 0; i < entryCount; i++)
+        {
+            int r = Random.Range(0, numberPot.Count);
+            output[i] = targetList[numberPot[r]];
+            numberPot.RemoveAt(r);
+        }
+        return output;
+    }
+    /// <summary>Selects and returns a random list filled with entries of <paramref name="targetArray"/></summary>
+    public static T[] SelectRandomRange<T>(this NativeArray<T> targetArray, int entryCount, bool forceUniqueEntries = true) where T : struct
+    {
+        T[] output = new T[entryCount];
+
+        if (!forceUniqueEntries)
+        {
+            for (int i = 0; i < entryCount; i++)
+            {
+                output[i] = targetArray[Random.Range(0, targetArray.Length)];
+            }
+            return output;
+        }
+
+        List<int> numberPot = new List<int>(targetArray.Length);
+        for (int i = 0; i < targetArray.Length; i++)
+        {
+            numberPot.Add(i);
+        }
+        for (int i = 0; i < entryCount; i++)
+        {
+            int r = Random.Range(0, numberPot.Count);
+            output[i] = targetArray[numberPot[r]];
+            numberPot.RemoveAt(r);
+        }
+        return output;
+    }
+    /// <summary>Selects and returns a random list filled with entries of <paramref name="targetList"/></summary>
+    public static T[] SelectRandomRange<T>(this NativeList<T> targetList, int entryCount, bool forceUniqueEntries = true) where T : unmanaged
+    {
+        T[] output = new T[entryCount];
+
+        if (!forceUniqueEntries)
+        {
+            for (int i = 0; i < entryCount; i++)
+            {
+                output[i] = targetList[Random.Range(0, targetList.Length)];
+            }
+            return output;
+        }
+
+        List<int> numberPot = new List<int>(targetList.Length);
+        for (int i = 0; i < targetList.Length; i++)
+        {
+            numberPot.Add(i);
+        }
+        for (int i = 0; i < entryCount; i++)
+        {
+            int r = Random.Range(0, numberPot.Count);
+            output[i] = targetList[numberPot[r]];
+            numberPot.RemoveAt(r);
         }
         return output;
     }
 
-    /// <summary>
-    /// Modifies a struct element in a list safely by copying, running the modifier, then writing it back.
-    /// </summary>
-    public static void ModifyAt<T>(this List<T> list, int index, ActionRef<T> modifier) where T : struct
-    {
-        T copy = list[index];
-        modifier(ref copy);
-        list[index] = copy;
-    }
-    public delegate void ActionRef<T>(ref T value);
+    #endregion
 
 
-    /// <returns>Wheather array is valid and has at least 1 entry</returns>
+    #region List/Array Has(Valid)Data
+
+    /// <returns>Whether array is valid and has at least 1 entry.</returns>
     public static bool HasData<T>(this T[] array)
     {
         return array != null && array.Length > 0;
     }
-    /// <returns>Wheather array is invalid or its length is 0</returns>
+    /// <returns>Whether array is invalid or it has 0 entries.</returns>
     public static bool IsNullOrEmpty<T>(this T[] array)
     {
         return array == null || array.Length == 0;
     }
-    /// <returns>Wheather array is invalid or its length is 0</returns>
+    /// <returns>Whether array is invalid or it has 0 entries.</returns>
     public static bool IsNotNullOrEmpty<T>(this T[] array)
     {
         return array != null && array.Length != 0;
     }
-    /// <returns>Wheather array is invalid or its length is 0 or it has null at one of its entries</returns>
+    /// <returns>Whether array is invalid  or it has 0 entries or it has one or more null entries</returns>
     public static bool HasInvalidData<T>(this T[] array)
     {
         bool arrayValid = array != null && array.Length > 0;
@@ -546,7 +634,7 @@ public static class ExtensionMethods
         }
         return false;
     }
-    /// <returns>Wheather array is valid or its length is more then 0 and it has no null at none of its entries</returns>
+    /// <returns>Whether array is invalid  or it has 0 entries or it has one or more null entries</returns>
     public static bool HasNoInvalidData<T>(this T[] array)
     {
         bool arrayValid = array != null && array.Length > 0;
@@ -585,6 +673,7 @@ public static class ExtensionMethods
     }
 
     #endregion
+
 
     /// <summary>
     /// Try finding an action by name, returns true if found, false if not. Outputs the found action

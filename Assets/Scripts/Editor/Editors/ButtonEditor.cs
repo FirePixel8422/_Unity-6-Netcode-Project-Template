@@ -14,7 +14,9 @@ namespace Fire_Pixel.Utility
             using (new EditorGUI.DisabledScope(!Application.isPlaying))
             {
                 if (GUILayout.Button(Application.isPlaying ? "Click" : "Click (Play Mode Only)") && Application.isPlaying)
+                {
                     ((Button)target).onClick.Invoke();
+                }
             }
         }
     }

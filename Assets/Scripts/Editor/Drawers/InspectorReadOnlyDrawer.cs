@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Fire_Pixel.Utility
 {
-    [CustomPropertyDrawer(typeof(EditorReadOnlyAttribute))]
-    public class ReadOnlyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(InspectorReadOnlyAttribute))]
+    public class InspectorReadOnlyDrawer : PropertyDrawer
     {
         public override float GetPropertyHeight(
             SerializedProperty property,

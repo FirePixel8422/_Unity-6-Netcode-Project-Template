@@ -3,6 +3,4 @@ using UnityEngine;
 
 
 [AttributeUsage(AttributeTargets.Struct)]
-public class InlineRangeAttribute : PropertyAttribute
-{
-}
+public class InlineRangeAttribute : PropertyAttribute { }
