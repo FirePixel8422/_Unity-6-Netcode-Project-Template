@@ -6,8 +6,8 @@ namespace Fire_Pixel.Networking
     public class MatchManager : SmartNetworkBehaviour
     {
 #pragma warning disable UDR0001
-        public static OneTimeAction PostMatchStarted_OnServer = new OneTimeAction();
-        public static OneTimeAction PostMatchStarted = new OneTimeAction();
+        public static OneTimeAction PostMatchStarted_OnServer = new();
+        public static OneTimeAction PostMatchStarted = new();
 #pragma warning restore UDR0001
 
         private int playerReadyCount;

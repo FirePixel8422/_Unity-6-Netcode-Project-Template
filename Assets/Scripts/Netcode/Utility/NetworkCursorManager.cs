@@ -1,11 +1,11 @@
 using UnityEngine;
 using Unity.Netcode;
 using Fire_Pixel.Networking;
+using System;
 
 public class NetworkCursorManager : SmartNetworkBehaviour
 {
     public static NetworkCursorManager Instance { get; private set; }
-
 
     [SerializeField] private NetworkCursorHandler cursorPrefab;
     [SerializeField] private Color[] cursorColors;
@@ -21,6 +21,7 @@ public class NetworkCursorManager : SmartNetworkBehaviour
         for (int i = 0; i < GlobalGameData.MAX_PLAYERS; i++)
         {
             cursors[i] = Instantiate(cursorPrefab, transform);
+            cursors[i].transform.position = new Vector3(0, -10000, 0);
 
             bool owner = ClientManager.LocalClientGameId == i;
             cursors[i].Init(cursorColors[i], owner);
@@ -29,10 +30,10 @@ public class NetworkCursorManager : SmartNetworkBehaviour
         canvas = GetComponent<Canvas>();
     }
 
-    [Rpc(SendTo.NotMe)]
+    [Rpc(SendTo.NotMe, Delivery = RpcDelivery.Unreliable)]
     public void SendMousePosition_RPC(Vector2 normalizedMousePos, RpcParams rpcParams = default)
     {
-        ulong senderClientId = rpcParams.Receive.SenderClientId;
+        ulong mouseId = rpcParams.Receive.SenderClientId;
 
         Vector2 canvasSize = canvas.pixelRect.size;
         Vector2 finalMousePos = new Vector2(
@@ -40,7 +41,7 @@ public class NetworkCursorManager : SmartNetworkBehaviour
             normalizedMousePos.y * canvasSize.y
         );
 
-        cursors[senderClientId].RecieveMousePosition_Local(finalMousePos);
+        cursors[mouseId].RecieveMousePosition_Local(finalMousePos);
     }
 
 
@@ -48,6 +49,6 @@ public class NetworkCursorManager : SmartNetworkBehaviour
     {
         if (cursorColors == null || cursorColors.Length == GlobalGameData.MAX_PLAYERS) return;
 
-        cursorColors = new Color[GlobalGameData.MAX_PLAYERS];
+        Array.Resize(ref cursorColors, GlobalGameData.MAX_PLAYERS);
     }
 }

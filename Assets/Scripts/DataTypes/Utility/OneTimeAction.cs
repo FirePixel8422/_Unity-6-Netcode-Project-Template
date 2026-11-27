@@ -8,21 +8,21 @@ namespace Fire_Pixel.Utility
     /// </summary>
     public class OneTimeAction
     {
-        private event Action InternalAction;
+        private event Action internalAction;
         public bool HasExecuted { get; private set; }
 
 
         public void Invoke()
         {
-            InternalAction?.Invoke();
-            InternalAction = null;
+            internalAction?.Invoke();
+            internalAction = null;
             HasExecuted = true;
         }
         public static OneTimeAction operator +(OneTimeAction e, Action action)
         {
             if (!e.HasExecuted)
             {
-                e.InternalAction += action;
+                e.internalAction += action;
             }
             else
             {
@@ -34,7 +34,7 @@ namespace Fire_Pixel.Utility
         {
             if (!e.HasExecuted)
             {
-                e.InternalAction -= action;
+                e.internalAction -= action;
             }
             return e;
         }

@@ -9,7 +9,6 @@ namespace Fire_Pixel.Networking
         [SerializeField] private TextMeshProUGUI localNameText, oponnentNameText;
 
 
-
         private void Awake()
         {
             MatchManager.PostMatchStarted += OnGameStarted;
@@ -22,14 +21,12 @@ namespace Fire_Pixel.Networking
             SendPlayerNameRpc(userName);
         }
 
-
         [Rpc(SendTo.Server)]
         private void SendPlayerNameRpc(string userName, RpcParams rpcParams = default)
         {
             ulong clientNetworkId = rpcParams.Receive.SenderClientId;
             SendPlayerNameRpc(userName, clientNetworkId, RpcTarget.Single(clientNetworkId, RpcTargetUse.Temp));
         }
-
         [Rpc(SendTo.SpecifiedInParams)]
         private void SendPlayerNameRpc(string userName, ulong playerNetworkId, RpcParams rpcParams = default)
         {

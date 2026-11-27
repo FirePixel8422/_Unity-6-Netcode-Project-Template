@@ -50,10 +50,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
   GlobalObjectIdHash: 3852124708
   InScenePlacedSourceGlobalObjectIdHash: 4055712283
+  m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
+  m_InScenePlaced: 1
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -84,7 +86,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5175170958893108009}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0dacef702faba7a4a80c35a661a56f30, type: 3}
   m_Name: 
@@ -106,7 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Fire_Pixel.Networking.PingChecker
   ShowTopMostFoldoutHeaderGroup: 1
   pingtext: {fileID: 0}
-  updateInterval: 0.5
+  updateInterval: 1
   halveRTT: 1
 --- !u!114 &3860541492353823203
 MonoBehaviour:
