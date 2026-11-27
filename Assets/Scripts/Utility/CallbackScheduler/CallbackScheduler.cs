@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-
 namespace Fire_Pixel.Utility
 {
 #pragma warning disable UDR0002
 #pragma warning disable UDR0004
+
     /// <summary>
-    /// Utility class to have optimized easy access to varying callbacks by using an Action based callback system.
+    /// Utility class to have optimized easy access to varying callbacks by using a pooled callback system.
     /// Handles callbacks and batches them for every script by an event based register system.
+    /// Does not guarantee order!!
     /// </summary>
     public static class CallbackScheduler
     {
@@ -24,42 +25,40 @@ namespace Fire_Pixel.Utility
         private static event Action _onApplicationQuitEvent;
         private static event Action _onLateApplicationQuitEvent;
 
-        private static List<DelayedCallback> _delayedCallbacks = new();
-        private static Stack<DelayedCallback> _callbackPool = new();
+        private static List<ScheduledCallback> _scheduledCallbacks = new();
+        private static Stack<ScheduledCallback> _callbackPool = new();
 
         private static bool _networkTickActive;
         private static bool _quitting;
 
-        private const string POOLSIZE_KEY = "InvokePoolSize";
+        private const string POOL_SIZE_KEY = "PoolConfig";
         private static int _peakCallbackCount;
 
 
-        #region Initalize
+        #region Initialization
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Init()
         {
             Reset();
 
-            SaveData.Load();
-
-            bool success = SaveData.TryGet(POOLSIZE_KEY, out int poolSize);
+            bool success = SaveData.TryGet(POOL_SIZE_KEY, out int poolSize);
             InitPool(success ? poolSize : 0);
 
-            CallbackRunnerInstance gameManager = new GameObject(">>CallbackScheduler<<").AddComponent<CallbackRunnerInstance>();
-            gameManager.Init();
+            CallbackRunnerInstance runnerInstance = new GameObject(">>CallbackScheduler<<").AddComponent<CallbackRunnerInstance>();
+            runnerInstance.Init();
 
-            GameObject.DontDestroyOnLoad(gameManager.gameObject);
+            GameObject.DontDestroyOnLoad(runnerInstance.gameObject);
         }
 
         private static void InitPool(int initialPoolSize)
         {
-            _delayedCallbacks = new List<DelayedCallback>(initialPoolSize);
-            _callbackPool = new Stack<DelayedCallback>(initialPoolSize);
+            _scheduledCallbacks = new List<ScheduledCallback>(initialPoolSize);
+            _callbackPool = new Stack<ScheduledCallback>(initialPoolSize);
 
             for (int i = 0; i < initialPoolSize; i++)
             {
-                _callbackPool.Push(new DelayedCallback());
+                _callbackPool.Push(new ScheduledCallback());
             }
 
             _peakCallbackCount = initialPoolSize;
@@ -76,9 +75,9 @@ namespace Fire_Pixel.Utility
             _onApplicationQuitEvent = null;
             _onLateApplicationQuitEvent = null;
 
-            for (int i = 0; i < _delayedCallbacks.Count; i++)
+            for (int i = 0; i < _scheduledCallbacks.Count; i++)
             {
-                DelayedCallback callback = _delayedCallbacks[i];
+                ScheduledCallback callback = _scheduledCallbacks[i];
 
                 callback.Id = -1;
                 callback.Reset();
@@ -86,8 +85,7 @@ namespace Fire_Pixel.Utility
                 _callbackPool.Push(callback);
             }
 
-            _delayedCallbacks.Clear();
-
+            _scheduledCallbacks.Clear();
             _networkTickActive = false;
             _quitting = false;
         }
@@ -229,77 +227,62 @@ namespace Fire_Pixel.Utility
         #endregion
 
 
-        #region Delayed Invoke Callbacks
+        #region Scheduled Callback System
 
         /// <summary>
-        /// Schedules a callback and returns its cancellation token.
+        /// Schedules a callback stored with <paramref name="groupId"/>.
         /// </summary>
-        public static DelayedCallback Invoke(Action callback, float delay, int groupId = 0)
+        /// <returns>The created and scheduled <see cref="ScheduledCallback"/></returns>
+        public static ScheduledCallback Schedule(Action callback, float delay, int groupId = 0)
         {
-            DelayedCallback delayedCallback = _callbackPool.Count > 0 ? _callbackPool.Pop() : new DelayedCallback();
+            ScheduledCallback scheduledCallback = _callbackPool.Count > 0 ? _callbackPool.Pop() : new ScheduledCallback();
 
-            delayedCallback.Init(callback, Time.time + delay, groupId, _delayedCallbacks.Count);
-            _delayedCallbacks.Add(delayedCallback);
+            scheduledCallback.Init(callback, Time.time + delay, groupId, _scheduledCallbacks.Count);
+            _scheduledCallbacks.Add(scheduledCallback);
 
-            if (_delayedCallbacks.Count > _peakCallbackCount)
+            if (_scheduledCallbacks.Count > _peakCallbackCount)
             {
-                _peakCallbackCount = _delayedCallbacks.Count;
+                _peakCallbackCount = _scheduledCallbacks.Count;
             }
 
-            return delayedCallback;
-        }
-
-        /// <summary>
-        /// Schedules a callback without creating a cancellation token.
-        /// </summary>
-        public static void InvokeAndForget(Action callback, float delay, int groupId = 0)
-        {
-            DelayedCallback delayedCallback = _callbackPool.Count > 0 ? _callbackPool.Pop() : new DelayedCallback();
-
-            delayedCallback.Init(callback, Time.time + delay, groupId, _delayedCallbacks.Count);
-            _delayedCallbacks.Add(delayedCallback);
-
-            if (_delayedCallbacks.Count > _peakCallbackCount)
-            {
-                _peakCallbackCount = _delayedCallbacks.Count;
-            }
+            return scheduledCallback;
         }
 
         /// <summary>
         /// Cancels all invokes with the same group id.
         /// </summary>
-        public static void CancelAllInvokesInGroup(int groupId)
+        public static void CancelAllSchedulesInGroup(int groupId)
         {
-            for (int i = _delayedCallbacks.Count - 1; i >= 0; i--)
+            for (int i = _scheduledCallbacks.Count - 1; i >= 0; i--)
             {
-                if (_delayedCallbacks[i].GroupId == groupId)
+                if (_scheduledCallbacks[i].GroupId == groupId)
                 {
-                    RemoveDelayedCallback(_delayedCallbacks[i]);
+                    RemoveScheduledCallback(_scheduledCallbacks[i]);
                 }
             }
         }
 
         /// <summary>
-        /// Removes a delayed callback using its current list index.
+        /// Remove (cancel) a delayed callback using its current list index.
         /// Swap-back keeps removal O(1).
         /// </summary>
-        internal static void RemoveDelayedCallback(DelayedCallback callback)
+        internal static void RemoveScheduledCallback(ScheduledCallback callback)
         {
             if (!callback.IsScheduled) return;
 
             int id = callback.Id;
-            int lastId = _delayedCallbacks.Count - 1;
+            int lastId = _scheduledCallbacks.Count - 1;
 
             callback.Id = -1;
 
             if (id != lastId)
             {
-                DelayedCallback movedCallback = _delayedCallbacks[lastId];
+                ScheduledCallback movedCallback = _scheduledCallbacks[lastId];
                 movedCallback.Id = id;
-                _delayedCallbacks[id] = movedCallback;
+                _scheduledCallbacks[id] = movedCallback;
             }
 
-            _delayedCallbacks.RemoveAt(lastId);
+            _scheduledCallbacks.RemoveAt(lastId);
 
             callback.Reset();
             _callbackPool.Push(callback);
@@ -308,36 +291,27 @@ namespace Fire_Pixel.Utility
         #endregion
 
 
-        #region Delayed Invoke Extension Methods
+        #region Scheduled Callbacks Extension Methods (MB)
 
         /// <summary>
-        /// Invoke function <paramref name="callback"/> after <paramref name="delay"/> seconds. Schedules a Delayed Callback on <see cref="CallbackScheduler"/> with groupId: <see cref="MonoBehaviour".EntityId/>
+        /// Schedule function <paramref name="callback"/> to execute after <paramref name="delay"/> seconds. Schedules a Delayed Callback on <see cref="CallbackScheduler"/> with groupId: <see cref="MonoBehaviour"/>.EntityId.
         /// </summary>
-        /// <returns>The scheduled callback ref</returns>
-        public static DelayedCallback Invoke(this MonoBehaviour mb, Action callback, float delay)
+        /// <returns>The created and scheduled <see cref="ScheduledCallback"/></returns>
+        public static ScheduledCallback Schedule(this MonoBehaviour mb, Action callback, float delay)
         {
-            return Invoke(callback, delay, mb.GetInstanceID());
+            return Schedule(callback, delay, mb.GetInstanceID());
         }
 
         /// <summary>
-        /// Invoke function <paramref name="callback"/> after <paramref name="delay"/> seconds. Schedules a Delayed Callback on <see cref="CallbackScheduler"/> with groupId: <see cref="MonoBehaviour"/>.EntityId.
-        /// No callback reference is created. The invoke is only cancelable with the groupId (<see cref="MonoBehaviour"/>.EntityId).
+        /// Stop (cancel) all scheduled <see cref="ScheduledCallback"/>'s on <see cref="CallbackScheduler"/> with groupId: <see cref="MonoBehaviour"/>.EntityId.
         /// </summary>
-        public static void InvokeAndForget(this MonoBehaviour mb, Action callback, float delay)
+        public static void CancelAllSchedules(this MonoBehaviour mb)
         {
-            InvokeAndForget(callback, delay, mb.GetInstanceID());
-        }
-
-        /// <summary>
-        /// Stops all scheduled Delayed Callbacks on <see cref="CallbackScheduler"/> with groupId: <see cref="MonoBehaviour"/>.EntityId.
-        /// No callback reference is created. The invokes are only cancelable with the groupId and their references are cleared.
-        /// </summary>
-        public static void CancelAllInvokes(this MonoBehaviour mb)
-        {
-            CancelAllInvokesInGroup(mb.GetInstanceID());
+            CancelAllSchedulesInGroup(mb.GetInstanceID());
         }
 
         #endregion
+
 
 
         /// <summary>
@@ -347,7 +321,11 @@ namespace Fire_Pixel.Utility
         {
             public void Init()
             {
+#if ENABLE_DEBUG_SYSTEMS
+                StartCoroutine(UpdateLoopDebug());
+#else
                 StartCoroutine(UpdateLoop());
+#endif
             }
 
             private IEnumerator UpdateLoop()
@@ -359,39 +337,39 @@ namespace Fire_Pixel.Utility
                 {
                     _onUpdateEvent?.Invoke();
 
-                    float time = Time.time;
-
-                    for (int i = _delayedCallbacks.Count - 1; i >= 0; i--)
+                    fixedAccumulator += Time.deltaTime;
+                    while (fixedAccumulator >= fixedDelta)
                     {
-                        DelayedCallback callback = _delayedCallbacks[i];
+                        _onFixedUpdateEvent?.Invoke();
 
-                        if (time < callback.InvokeGlobalTime) continue;
+                        fixedAccumulator -= fixedDelta;
+                    }
+
+                    float time = Time.time;
+                    for (int i = _scheduledCallbacks.Count - 1; i >= 0; i--)
+                    {
+                        ScheduledCallback callback = _scheduledCallbacks[i];
+
+                        if (time < callback.ExecuteAtTime) continue;
 
                         callback.Callback?.Invoke();
 
                         // The callback may have cancelled itself or been cancelled by another callback.
                         if (callback.IsScheduled)
                         {
-                            RemoveDelayedCallback(callback);
+                            RemoveScheduledCallback(callback);
                         }
                     }
 
-                    fixedAccumulator += Time.deltaTime;
-
-                    while (fixedAccumulator >= fixedDelta)
-                    {
-                        _onFixedUpdateEvent?.Invoke();
-                        fixedAccumulator -= fixedDelta;
-                    }
-
                     _onLateUpdateEvent?.Invoke();
-
                     _onLateDestroyEvent?.Invoke();
+
                     _onLateDestroyEvent = null;
 
                     if (_quitting)
                     {
                         _onLateApplicationQuitEvent?.Invoke();
+
                         _onLateApplicationQuitEvent = null;
                         StopAllCoroutines();
                         yield break;
@@ -401,13 +379,103 @@ namespace Fire_Pixel.Utility
                 }
             }
 
+#if ENABLE_DEBUG_SYSTEMS
+            private IEnumerator UpdateLoopDebug()
+            {
+                float fixedAccumulator = 0f;
+                float fixedDelta = Time.fixedDeltaTime;
+
+                while (true)
+                {
+                    InvokeSafely(_onUpdateEvent);
+
+                    float time = Time.time;
+
+                    for (int i = _scheduledCallbacks.Count - 1; i >= 0; i--)
+                    {
+                        ScheduledCallback callback = _scheduledCallbacks[i];
+
+                        if (time < callback.ExecuteAtTime) continue;
+
+                        InvokeDelayedSafely(callback.Callback);
+
+                        // The callback may have cancelled itself or been cancelled by another callback.
+                        if (callback.IsScheduled)
+                        {
+                            RemoveScheduledCallback(callback);
+                        }
+                    }
+
+                    fixedAccumulator += Time.deltaTime;
+
+                    while (fixedAccumulator >= fixedDelta)
+                    {
+                        InvokeSafely(_onFixedUpdateEvent);
+
+                        fixedAccumulator -= fixedDelta;
+                    }
+
+                    InvokeSafely(_onLateUpdateEvent);
+                    InvokeSafely(_onLateDestroyEvent);
+
+                    _onLateDestroyEvent = null;
+
+                    if (_quitting)
+                    {
+                        InvokeSafely(_onLateApplicationQuitEvent);
+
+                        _onLateApplicationQuitEvent = null;
+                        StopAllCoroutines();
+                        yield break;
+                    }
+
+                    yield return null;
+                }
+            }
+
+            private static void InvokeSafely(Action callback)
+            {
+                if (callback == null) return;
+
+                Delegate[] subscribers = callback.GetInvocationList();
+
+                for (int i = 0; i < subscribers.Length; i++)
+                {
+                    try
+                    {
+                        ((Action)subscribers[i]).Invoke();
+                    }
+                    catch (Exception exception)
+                    {
+                        DebugLogger.LogException(exception);
+                    }
+                }
+            }
+            private static void InvokeDelayedSafely(Action callback)
+            {
+                try
+                {
+                    callback?.Invoke();
+                }
+                catch (Exception exception)
+                {
+                    DebugLogger.LogException(exception);
+                }
+            }
+#endif
+
             private void OnApplicationQuit()
             {
-                SaveData.Set(POOLSIZE_KEY, _peakCallbackCount);
+                SaveData.Set(POOL_SIZE_KEY, _peakCallbackCount);
                 SaveData.Save();
 
-                _quitting = true;
+#if ENABLE_DEBUG_SYSTEMS
+                InvokeSafely(_onApplicationQuitEvent);
+#else
                 _onApplicationQuitEvent?.Invoke();
+#endif
+
+                _quitting = true;
             }
 
             private void OnDestroy()
@@ -424,9 +492,6 @@ namespace Fire_Pixel.Utility
             }
         }
     }
-#pragma warning restore UDR0002
-#pragma warning restore UDR0004
-
 
     public enum CallbackType : byte
     {
@@ -440,16 +505,16 @@ namespace Fire_Pixel.Utility
         LateApplicationQuit,
     }
 
-    public sealed class DelayedCallback
+    public sealed class ScheduledCallback
     {
         public Action Callback;
-        public float InvokeGlobalTime;
+        public float ExecuteAtTime;
         public int GroupId;
 
         internal int Id;
         internal bool IsScheduled => Id != -1;
 
-        internal DelayedCallback()
+        internal ScheduledCallback()
         {
             Id = -1;
         }
@@ -457,7 +522,7 @@ namespace Fire_Pixel.Utility
         internal void Init(Action callback, float invokeGlobalTime, int groupId, int id)
         {
             Callback = callback;
-            InvokeGlobalTime = invokeGlobalTime;
+            ExecuteAtTime = invokeGlobalTime;
             GroupId = groupId;
             Id = id;
         }
@@ -465,13 +530,16 @@ namespace Fire_Pixel.Utility
         internal void Reset()
         {
             Callback = null;
-            InvokeGlobalTime = -1f;
+            ExecuteAtTime = -1f;
             GroupId = -1;
         }
 
         public void Cancel()
         {
-            CallbackScheduler.RemoveDelayedCallback(this);
+            CallbackScheduler.RemoveScheduledCallback(this);
         }
     }
+
+#pragma warning restore UDR0002
+#pragma warning restore UDR0004
 }

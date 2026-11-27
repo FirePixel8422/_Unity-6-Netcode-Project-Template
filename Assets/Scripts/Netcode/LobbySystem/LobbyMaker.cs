@@ -40,8 +40,8 @@ namespace Fire_Pixel.Networking
         public const string LOBBY_TERMINATED_STR = "LobbyTerminated";
         public const string LOBBY_LAST_HEARTBEAT_STR = "LobbyLastHeartbeatUTC";
 
-        public const string PLAYERGUID_SAVEDATA = "PlayerGUID.fpx";
-        public const string REJOINDATA_SAVEDATA = "RejoinData.fpx";
+        public const string PLAYER_GUID_KEY = "PlayerGUID.fpx";
+        public const string REJOIN_DATA_KEY = "RejoinData.fpx";
 
 
         private void Start()
@@ -51,7 +51,7 @@ namespace Fire_Pixel.Networking
         }
         private async Task InitializeAsync()
         {
-            if (SaveData.TryGet(PLAYERGUID_SAVEDATA, out string playerGUID))
+            if (SaveData.TryGet(PLAYER_GUID_KEY, out string playerGUID))
             {
                 ClientManager.SetPlayerGUID(playerGUID);
             }
@@ -61,10 +61,10 @@ namespace Fire_Pixel.Networking
 
                 ClientManager.SetPlayerGUID(newGUID);
 
-                SaveData.Set(PLAYERGUID_SAVEDATA, newGUID);
+                SaveData.Set(PLAYER_GUID_KEY, newGUID);
             }
 
-            if (SaveData.TryGet<string>(REJOINDATA_SAVEDATA, out string lastJoinedLobbyId))
+            if (SaveData.TryGet<string>(REJOIN_DATA_KEY, out string lastJoinedLobbyId))
             {
                 try
                 {
@@ -84,7 +84,7 @@ namespace Fire_Pixel.Networking
                     else
                     {
                         // Destroy the rejoin reference if the lobby doesnt exist (anymore)
-                        SaveData.Delete(REJOINDATA_SAVEDATA);
+                        SaveData.Delete(REJOIN_DATA_KEY);
 
                         DebugLogger.Log("Lobby is null", lobby == null);
                         DebugLogger.Log("Heartbeat: " + long.Parse(lobby.Data[LOBBY_LAST_HEARTBEAT_STR].Value));
@@ -94,7 +94,7 @@ namespace Fire_Pixel.Networking
                 catch (LobbyServiceException e)
                 {
                     DebugLogger.Log("No rejoinable lobby detected:\n" + e.ToString());
-                    SaveData.Delete(REJOINDATA_SAVEDATA);
+                    SaveData.Delete(REJOIN_DATA_KEY);
                 }
             }
         }

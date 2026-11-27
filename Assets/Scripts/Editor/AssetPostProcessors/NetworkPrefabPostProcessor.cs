@@ -18,7 +18,7 @@ public class NetworkPrefabAutoNamer : AssetPostprocessor
 
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
 
-            if (prefab == null || prefab.transform.HasComponent<NetworkObject>()) continue;
+            if (prefab == null || !prefab.transform.HasComponent<NetworkObject>()) continue;
 
             string fileName = Path.GetFileNameWithoutExtension(path);
 

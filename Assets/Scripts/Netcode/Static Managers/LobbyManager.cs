@@ -39,7 +39,7 @@ namespace Fire_Pixel.Networking
                 return;
             }
 
-            SaveData.Set(LobbyId, LobbyMaker.REJOINDATA_SAVEDATA);
+            SaveData.Set(LobbyId, LobbyMaker.REJOIN_DATA_KEY);
         }
 
         /// <summary>

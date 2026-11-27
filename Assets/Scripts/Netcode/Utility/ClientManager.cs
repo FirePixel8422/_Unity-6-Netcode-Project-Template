@@ -289,11 +289,11 @@ namespace Fire_Pixel.Networking
             {
 #if Enable_Debug_Systems
                 // Destroy the rejoin reference on the kicked client
-                bool deletionSucces = SaveData.Delete(LobbyMaker.REJOINDATA_SAVEDATA);
-                DebugLogger.Log($"{LobbyMaker.REJOINDATA_SAVEDATA} deleted: " + deletionSucces, LogDebugInfo);
+                bool deletionSucces = SaveData.Delete(LobbyMaker.REJOIN_DATA_KEY);
+                DebugLogger.Log($"{LobbyMaker.REJOIN_DATA_KEY} deleted: " + deletionSucces, LogDebugInfo);
 #else
                 // Destroy the rejoin reference on the kicked client
-                FileManager.TryDeleteFile(LobbyMaker.REJOINDATA_PATH);
+                SaveData.Delete(LobbyMaker.REJOIN_DATA_KEY);
 #endif
 
                 if (MessageHandler.Instance != null)

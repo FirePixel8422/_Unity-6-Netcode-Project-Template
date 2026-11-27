@@ -841,7 +841,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Standalone: Enable_Debug_Systems
+    Standalone: ENABLE_DEBUG_SYSTEMS
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
